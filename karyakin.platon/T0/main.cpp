@@ -2,6 +2,6 @@
 
 int main()
 {
-	std::cout << "karyakin.platon\n";
-	return 0;
+    std::cout << "karyakin.platon\n";
+    return 0;
 }
