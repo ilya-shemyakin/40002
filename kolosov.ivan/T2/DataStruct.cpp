@@ -32,7 +32,7 @@ namespace nspace
             in.iword(NEXT_CHAR_AS_LOWERCASE_DATA_ID) = 0;
         }
         else
-        { 
+        {
             in >> c;
         }
         if (in && (c != dest.exp))
