@@ -10,8 +10,8 @@ namespace nspace
         }
         if (left.key1 == right.key1)
         {
-            double l = left.key2.first / static_cast<long long double>(left.key2.second);
-            double r = right.key2.first / static_cast<long long double>(right.key2.second);
+            double l = left.key2.first / static_cast<long double>(left.key2.second);
+            double r = right.key2.first / static_cast<long double>(right.key2.second);
             return l < r;
         }
         return left.key1 < right.key1;
