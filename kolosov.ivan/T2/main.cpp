@@ -2,7 +2,7 @@
 
 int main()
 {
-    using nspace::DataStruct;
+    using dataStruct::DataStruct;
 
     std::vector< DataStruct > data;
 
@@ -24,7 +24,7 @@ int main()
     (
         data.begin(),
         data.end(),
-        nspace::comparator
+        dataStruct::comparator
     );
 
     std::copy(
