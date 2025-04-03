@@ -1,7 +1,25 @@
 #include "DataStruct.h"
 
-namespace nspace
+static const int NEXT_CHAR_AS_LOWERCASE_DATA_ID = std::ios::xalloc();
+
+namespace dataStruct
 {
+    unsigned long long gcd(unsigned long long a, unsigned long long b)
+    {
+        if (a < b)
+        {
+            std::swap(a, b);
+        }
+        unsigned long long temp = 0;
+        while (b != 0)
+        {
+            temp = b;
+            b = a % b;
+            a = temp;
+        }
+        return a;
+    }
+
     bool comparator(const DataStruct& left, const DataStruct& right)
     {
         if (left.key1 == right.key1 && left.key2 == right.key2)
@@ -10,9 +28,8 @@ namespace nspace
         }
         if (left.key1 == right.key1)
         {
-            double l = left.key2.first / static_cast<long double>(left.key2.second);
-            double r = right.key2.first / static_cast<long double>(right.key2.second);
-            return l < r;
+            unsigned long long greatestCommonDivisor = dataStruct::gcd(left.key2.second, right.key2.second);
+            return left.key2.first * greatestCommonDivisor / left.key2.second < right.key2.first * greatestCommonDivisor / right.key2.second;
         }
         return left.key1 < right.key1;
     }
@@ -32,7 +49,7 @@ namespace nspace
             in.iword(NEXT_CHAR_AS_LOWERCASE_DATA_ID) = 0;
         }
         else
-        {
+        { 
             in >> c;
         }
         if (in && (c != dest.exp))
@@ -124,6 +141,11 @@ namespace nspace
                 {
                     in >> str{ input.key3 };
                     flag3 = true;
+                }
+                else
+                {
+                    in.setstate(std::ios::failbit);
+                    break;
                 }
             }
         }
