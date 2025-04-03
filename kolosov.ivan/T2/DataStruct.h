@@ -11,10 +11,8 @@
 #include <algorithm>
 #include <cctype>
 
-namespace nspace
+namespace dataStruct
 {
-    static const int NEXT_CHAR_AS_LOWERCASE_DATA_ID = std::ios::xalloc();
-
     struct DataStruct
     {
         double key1;
