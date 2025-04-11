@@ -18,6 +18,10 @@ int main()
             std::istream_iterator< DataStruct >(),
             std::back_inserter(data)
         );
+        if (!std::cin)
+        {
+            std::cin.ignore(100,'\n');
+        }
     }
 
     std::sort
