@@ -12,9 +12,6 @@
 
 namespace nspace
 {
-
-
-//     scope guard для возврата состояния потока в первоначальное состояние
     class iofmtguard
     {
     public:
@@ -143,13 +140,7 @@ namespace nspace
         {
             return in;
         }
-        std::string data = ""; // data = ull:key2
-
-
-        //if ((in >> StringUll{ data }) && (data != dest.exp))
-        //{
-        //    in.setstate(std::ios::failbit);
-        //}
+        std::string data = ""; 
         if (in >> StringUll{ data }) {
             std::transform(data.begin(), data.end(), data.begin(), tolower);
             if (data != dest.exp) {
@@ -262,11 +253,6 @@ namespace nspace
             using str = StringKeyString;
             std::vector<int> key(4, 0);
             in >> sep{ '(' } >> sep{ ':' };
-             //if (!in) {
-             //       in.clear();
-             //       in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-             //       return in;
-             //   }
             std::string strKey;
             for (int i = 0; i < 3; ++i) {
               
@@ -286,18 +272,8 @@ namespace nspace
                 else {
                     in.setstate(std::ios::failbit);
                 }
-                //if (!in) {
-                //    in.clear();
-                //    in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                //    return in;
-                //}
             }
             in >> sep{ ':' } >> sep{ ')' };
-         /*   if (!in) {
-                in.clear();
-                in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                return in;
-            }*/
         }
         if (in)
         {
@@ -372,7 +348,5 @@ int main() {
         std::end(data),
         std::ostream_iterator< Data >(std::cout, "\n")
     );
-    
-
     return 0;
 }
