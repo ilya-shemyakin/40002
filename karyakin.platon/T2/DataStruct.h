@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #ifndef DATASTRUCT_H
 #define DATASTRUCT_H
