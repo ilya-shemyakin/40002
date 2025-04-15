@@ -81,7 +81,6 @@ std::ostream& operator<<(std::ostream& os, const DataStruct& ds) {
 
 int main() {
     std::vector<DataStruct> data;
-
     std::copy(std::istream_iterator<DataStruct>(std::cin),
         std::istream_iterator<DataStruct>(),
         std::back_inserter(data));
@@ -97,7 +96,6 @@ int main() {
             if (a.key2 != b.key2) return a.key2 < b.key2;
             return a.key3.length() < b.key3.length();
             });
-
         std::copy(data.begin(), data.end(),
             std::ostream_iterator<DataStruct>(std::cout, "\n"));
     }
