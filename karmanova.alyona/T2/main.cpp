@@ -7,7 +7,7 @@
 #include <iomanip>
 #include <complex>
 #include <algorithm>
-#include <cctype> 
+#include <cctype>
 #include <fstream>
 
 namespace nspace
@@ -97,7 +97,6 @@ namespace nspace
     std::istream& operator>>(std::istream& in, LabelUll&& dest);
     std::istream& operator>>(std::istream& in, Data& dest);
     std::istream& operator>>(std::istream& in, std::complex<double>& x);
-  
     std::istream& operator>>(std::istream& in, DelimiterIO&& dest)
     {
         std::istream::sentry sentry(in);
@@ -138,13 +137,13 @@ namespace nspace
         {
             return in;
         }
-        std::string data = ""; 
+        std::string data = "";
         if (in >> StringUll{ data }) {
             std::transform(data.begin(), data.end(), data.begin(), tolower);
             if (data != dest.exp) {
                 in.setstate(std::ios::failbit);
             }
-        } 
+        }
         else {
             in.setstate(std::ios::failbit);
         }
@@ -160,7 +159,6 @@ namespace nspace
         }
         return in >> dest.ref >> LabelUll{ "ull" };
     }
-   
     std::istream& operator>>(std::istream& in, ComplexStruct&& dest)
     {
         std::istream::sentry sentry(in);
@@ -215,7 +213,6 @@ namespace nspace
         x.imag(im);
         return in;
     }
-    
     bool checkKey(std::string& strKey, std::vector<int>& key) {
         if (strKey.size() == 4) {
             if (strKey.substr(0, 3) == "key") {
@@ -253,7 +250,6 @@ namespace nspace
             in >> sep{ '(' } >> sep{ ':' };
             std::string strKey;
             for (int i = 0; i < 3; ++i) {
-              
                 in >> strKey;
                 if (checkKey(strKey, key)) {
                     key[strKey[3] - '0'] = 1;
