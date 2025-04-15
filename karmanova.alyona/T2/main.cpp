@@ -120,7 +120,7 @@ namespace nspace
         {
             return in;
         }
-        std::string data = ""; // data = ull:key2
+        std::string data = "";
 
 
         if ((in >> StringKey{data}) && (data != dest.exp))
@@ -233,7 +233,6 @@ namespace nspace
 
     std::istream& operator>>(std::istream& in, Data& dest)
     {
-        bool flag = true;
         std::istream::sentry sentry(in);
         if (!sentry)
         {
@@ -242,7 +241,6 @@ namespace nspace
         Data input;
         {
             using sep = DelimiterIO;
-            using label = LabelKey;
             using complex = ComplexStruct;
             using ull = UllStruct;
             using str = StringKeyString;
@@ -254,10 +252,10 @@ namespace nspace
                 if (checkKey(strKey, key)) {
                     key[strKey[3] - '0'] = 1;
                     if (strKey[3] == '1') {
-                        in >> UllStruct{ input.key1 };
+                        in >> ull{input.key1 };
                     }
                     else if (strKey[3] == '2') {
-                        in >> ComplexStruct{ input.key2 };
+                        in >> complex{ input.key2 };
                     }
                     else {
                         in >> str{ input.key3 };
