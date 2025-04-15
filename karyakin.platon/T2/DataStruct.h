@@ -1,5 +1,3 @@
-﻿#pragma once
-
 #ifndef DATASTRUCT_H
 #define DATASTRUCT_H
 
@@ -75,4 +73,4 @@ namespace nspace
     std::ostream& operator<<(std::ostream& out, const DataStruct& dest);
 }
 
-#endif !DATASTRUCT_H
+#endif //!DATASTRUCT_H
