@@ -326,8 +326,6 @@ bool cmp(const Data& first, const Data& other) { // tmp1 <= tmp2
 int main() {
     using nspace::Data;
     std::vector<Data> data;
-   
-    // std::ifstream file("file.txt");
     while (!std::cin.eof()) {
         std::copy(
             std::istream_iterator< Data >(std::cin),
