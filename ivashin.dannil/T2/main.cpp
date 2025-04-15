@@ -19,7 +19,7 @@ std::istream& operator>>(std::istream& is, DataStruct& ds) {
     }
 
     std::istringstream iss(line);
-    iss >> std::ws; // skip first space
+    iss >> std::ws; // Пропускаем начальные пробелы
     char c;
     if (!(iss >> c) || c != '(') {
         is.setstate(std::ios::failbit);
