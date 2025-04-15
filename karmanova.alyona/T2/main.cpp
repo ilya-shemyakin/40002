@@ -105,7 +105,6 @@ namespace nspace
   
     std::istream& operator>>(std::istream& in, DelimiterIO&& dest)
     {
-        // все перегрузки операторов ввода/вывода должны начинаться с проверки экземпляра класса sentry
         std::istream::sentry sentry(in);
         if (!sentry)
         {
@@ -180,7 +179,8 @@ namespace nspace
         {
             return in;
         }
-        return in >> DelimiterIO{ '#' } >> DelimiterIO{ 'c' } >> DelimiterIO{ '(' } >> dest.ref >> DelimiterIO{ ')' } >> DelimiterIO{ ':' };
+        in >> DelimiterIO{ '#' } >> DelimiterIO{ 'c' } >> DelimiterIO{ '(' };
+        return in >> dest.ref >> DelimiterIO{ ')' } >> DelimiterIO{ ':' };
     }
 
     std::istream& operator>>(std::istream& in, StringKeyString&& dest)
