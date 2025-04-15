@@ -44,9 +44,7 @@ namespace nspace
     struct Data
     {
         unsigned long long key1;
-      //   :key1 89ull:
         std::complex<double> key2;
-       // :key2 #c(1.0 -1.0):
         std::string key3;
 
     };
