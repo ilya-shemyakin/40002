@@ -24,11 +24,5 @@ int main()
         std::ostream_iterator<DataStruct>(std::cout, "\n")
     );
 
-
-    std::cout
-        << "good: " << std::cin.good() << ", "
-        << "fail: " << std::cin.fail() << ", "
-        << "bad: " << std::cin.bad() << ", "
-        << "eof: " << std::cin.eof() << std::endl;
     return 0;
 }
