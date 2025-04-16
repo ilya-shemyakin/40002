@@ -258,14 +258,14 @@ namespace nspace
                         in >> complex{ input.key2 };
                     }
                     else {
-                        in >> str{ input.key3 };
+                        in >> str{ input.key3 } >> sep{ ':' };
                     }
                 }
                 else {
                     in.setstate(std::ios::failbit);
                 }
             }
-            in >> sep{ ':' } >> sep{ ')' };
+            in >> sep{ ')' };
         }
         if (in)
         {
@@ -306,7 +306,7 @@ bool cmp(const Data& first, const Data& other) { // tmp1 <= tmp2
             return false;
         }
         else {
-            if (first.key3.size() <= other.key3.size()) {
+            if (first.key3.size() < other.key3.size()) {
                 return true;
             }
             else {
