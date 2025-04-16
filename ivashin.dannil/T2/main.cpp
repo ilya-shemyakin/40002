@@ -23,13 +23,12 @@ namespace nspace {
         std::ios_base::fmtflags fmt_;
     };
 
-    // Оператор ввода
     std::istream& operator>>(std::istream& is, DataStruct& ds) {
         std::istream::sentry sentry(is);
         if (!sentry) return is;
 
         DataStruct temp;
-        std::vector<bool> keys(3, false); // Отслеживаем наличие key1, key2, key3
+        std::vector<bool> keys(3, false); // key1, key2, key3
         char c;
         std::string token;
 
@@ -130,10 +129,8 @@ int main() {
         }
     }
 
-    // sort
     std::sort(data.begin(), data.end(), cmp);
 
-    // output
     std::copy(
         data.begin(),
         data.end(),
