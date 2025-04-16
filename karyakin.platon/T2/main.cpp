@@ -1,15 +1,28 @@
-﻿#include "DataStruct.h"
+#include "DataStruct.h"
 
 int main()
 {
     using nspace::DataStruct;
 
     std::vector<DataStruct> data;
-    std::copy(
-        std::istream_iterator<DataStruct>(std::cin),
-        std::istream_iterator<DataStruct>(),
-        std::back_inserter(data)
-    );
+    while (!std::cin.eof())
+    {
+        if (!std::cin)
+        {
+            std::cin.clear();
+        }
+        std::copy(
+            std::istream_iterator<DataStruct>(std::cin),
+            std::istream_iterator<DataStruct>(),
+            std::back_inserter(data)
+        );
+        if (!std::cin)
+        {
+            std::cin.ignore(100, '\n');
+        }
+
+    }
+
 
     std::sort(data.begin(), data.end(), [](const DataStruct& a, const DataStruct& b) {
         if (a.key1 != b.key1) return a.key1 < b.key1;
