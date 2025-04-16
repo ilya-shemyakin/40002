@@ -13,6 +13,7 @@ struct DataStruct
     std::string key3_;
 };
 
+// Класс для сохранения и восстановления формата потока
 class IofmtGuard
 {
 public:
@@ -32,6 +33,7 @@ private:
     std::ios_base::fmtflags flags_;
 };
 
+// ввод для DataStruct
 std::istream& operator>>(std::istream& input, DataStruct& data)
 {
     std::istream::sentry sentry(input);
@@ -74,7 +76,12 @@ std::istream& operator>>(std::istream& input, DataStruct& data)
         else if (token == "key2" && !keysPresent[1])
         {
             std::string hexString;
-            if (!(input >> hexString) || hexString.size() < 3 || hexString.substr(0, 2) != "0x")
+            if (!(input >> hexString))
+            {
+                input.setstate(std::ios::failbit);
+                break;
+            }
+            if (hexString.size() < 2 || hexString.substr(0, 2) != "0x")
             {
                 input.setstate(std::ios::failbit);
                 break;
@@ -119,6 +126,7 @@ std::istream& operator>>(std::istream& input, DataStruct& data)
     return input;
 }
 
+// для DataStruct
 std::ostream& operator<<(std::ostream& output, const DataStruct& data)
 {
     std::ostream::sentry sentry(output);
@@ -133,6 +141,7 @@ std::ostream& operator<<(std::ostream& output, const DataStruct& data)
     return output;
 }
 
+// для сортировки
 bool compareData(const DataStruct& first, const DataStruct& second)
 {
     if (first.key1_ != second.key1_)
@@ -149,28 +158,39 @@ bool compareData(const DataStruct& first, const DataStruct& second)
 int main()
 {
     std::vector<DataStruct> data;
+    bool hasValidRecord = false;
 
     while (!std::cin.eof())
     {
-        std::copy(
-            std::istream_iterator<DataStruct>(std::cin),
-            std::istream_iterator<DataStruct>(),
-            std::back_inserter(data)
-        );
-        if (!std::cin)
+        std::istream::pos_type startPos = std::cin.tellg();
+        DataStruct temp;
+        std::cin >> temp;
+        if (std::cin)
+        {
+            data.push_back(temp);
+            hasValidRecord = true;
+        }
+        else
         {
             std::cin.clear();
+            if (startPos != -1)
+            {
+                std::cin.seekg(startPos);
+            }
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         }
     }
 
-    std::sort(data.begin(), data.end(), compareData);
-
-    std::copy(
-        data.begin(),
-        data.end(),
-        std::ostream_iterator<DataStruct>(std::cout, "\n")
-    );
+    if (hasValidRecord)
+    {
+        std::cout << "Atleast one supported record type\n";
+        std::sort(data.begin(), data.end(), compareData);
+        std::copy(
+            data.begin(),
+            data.end(),
+            std::ostream_iterator<DataStruct>(std::cout, "\n")
+        );
+    }
 
     return 0;
 }
