@@ -1,4 +1,4 @@
-﻿#include "DataStruct.h"
+#include "DataStruct.h"
 
 
 namespace nspace
@@ -13,12 +13,20 @@ namespace nspace
         return in;
     }
 
+    std::istream& operator>>(std::istream& in, LongLongIOLL&& dest)
+    {
+        std::istream::sentry sentry(in);
+        if (!sentry) return in;
+        return in >> dest.ref >> DelimiterIO{ 'l' } >> DelimiterIO{ 'l' };
+    }
+
     std::istream& operator>>(std::istream& in, LongLongIO&& dest)
     {
         std::istream::sentry sentry(in);
         if (!sentry) return in;
         return in >> dest.ref;
     }
+
 
     std::istream& operator>>(std::istream& in, UnsignedLongLongIO&& dest)
     {
@@ -65,24 +73,24 @@ namespace nspace
 
 
         while (in >> DelimiterIO{ ':' } && in >> key)
-           {
-               if (key == ")") {
-                   in.putback(')');
-                   break;
-                }
-               if (key == "key1") {
-                    in >> LongLongIO{ input.key1 };
-                    hasKey1 = true;
-                }
-               else if (key == "key2") {
-                    in >> PairIO{ input.key2 };
-                    hasKey2 = true;
-                }
-               else if (key == "key3") {
-                    in >> StringIO{ input.key3 };
-                    hasKey3 = true;
-                }
+        {
+            if (key == ")") {
+                in.putback(')');
+                break;
             }
+            if (key == "key1") {
+                in >> LongLongIOLL{ input.key1 };
+                hasKey1 = true;
+            }
+            else if (key == "key2") {
+                in >> PairIO{ input.key2 };
+                hasKey2 = true;
+            }
+            else if (key == "key3") {
+                in >> StringIO{ input.key3 };
+                hasKey3 = true;
+            }
+        }
         in >> DelimiterIO{ ')' };
         if (hasKey1 && hasKey2 && hasKey3) dest = input;
         else in.setstate(std::ios::failbit);
@@ -95,7 +103,7 @@ namespace nspace
         std::ostream::sentry sentry(out);
         if (!sentry) return out;
         iofmtguard fmtguard(out);
-        out << "(:key1 " << src.key1;
+        out << "(:key1 " << src.key1 << "ll";
         out << ":key2 (:N " << src.key2.first << ":D " << src.key2.second << ":)";
         out << ":key3 \"" << src.key3 << "\":)";
         return out;
