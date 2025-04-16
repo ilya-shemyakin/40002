@@ -284,7 +284,7 @@ namespace nspace
         iofmtguard fmtguard(out);
         out << "(";
         out << ":key1 " << std::fixed << std::setprecision(1) << src.key1 << "ull";
-        out << ":key2 #Be("  << src.key2.real() << " " << src.key2.imag() << ")";
+        out << ":key2 #c("  << src.key2.real() << " " << src.key2.imag() << ")";
         out << ":key3 \"" << src.key3;
         out << "\":)";
         return out;
