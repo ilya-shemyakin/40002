@@ -33,6 +33,7 @@ namespace dataStruct
                right.key2.first * static_cast<long long>(left.key2.second / greatestCommonDivisor);
         }
         return left.key1 < right.key1;
+    }
 
     std::istream& operator>>(std::istream& in, DelimiterIO&& dest)
     {
