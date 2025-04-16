@@ -25,9 +25,13 @@ int main()
         }
     }
 
-    std::ranges::sort(dataVector, dataStruct::compareData);
-    std::ranges::copy(
-        dataVector,
+    std::sort(
+        dataVector.begin(),
+        dataVector.end(),
+        dataStruct::compareData);
+    std::copy(
+        dataVector.begin(),
+        dataVector.end(),
         std::ostream_iterator<DataStruct>(std::cout, "\n")
     );
 
