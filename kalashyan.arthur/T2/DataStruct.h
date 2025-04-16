@@ -45,14 +45,14 @@ namespace dataStruct
     class IOFormatGuard
     {
     public:
-        explicit IOFormatGuard(std::basic_ios<char>& stream);
+        explicit IOFormatGuard(std::basic_ios<char>& s);
         ~IOFormatGuard();
     private:
-        std::basic_ios<char>& stream_;
+        std::basic_ios<char>& s_;
         std::streamsize width_;
         char fill_;
         std::streamsize precision_;
-        std::ios::fmtflags flags_;
+        std::ios::fmtflags fmt_;
     };
 
     std::istream& operator>>(std::istream& in, DelimiterIO&& dest);
@@ -61,7 +61,7 @@ namespace dataStruct
     std::istream& operator>>(std::istream& in, LongLongIO&& dest);
     std::istream& operator>>(std::istream& in, UnsignedLongLongIO&& dest);
     std::istream& operator>>(std::istream& in, DataStruct& dest);
-    std::ostream& operator<<(std::ostream& out, const DataStruct& src);
+    std::ostream& operator<<(std::ostream& out, const DataStruct& dest);
 }
 
 #endif

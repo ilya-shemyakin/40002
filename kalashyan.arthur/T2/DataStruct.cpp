@@ -1,13 +1,4 @@
 #include "DataStruct.h"
-#include <cmath>
-#include <iomanip>
-#include <limits>
-
-namespace 
-{
-    const double FLOAT_EPSILON = 1e-10;
-    const int IGNORE_COUNT = 2;
-}
 
 namespace dataStruct
 {
@@ -16,17 +7,15 @@ namespace dataStruct
         const double leftAbs = std::abs(left.key1);
         const double rightAbs = std::abs(right.key1);
         
-        if (std::abs(leftAbs - rightAbs) > FLOAT_EPSILON)
+        if (std::abs(leftAbs - rightAbs) > 1e-10)
         {
             return leftAbs < rightAbs;
         }
 
-        const double leftRatio = static_cast<double>(left.key2.first) 
-            / left.key2.second;
-        const double rightRatio = static_cast<double>(right.key2.first) 
-            / right.key2.second;
+        const double leftRatio = static_cast<double>(left.key2.first) / left.key2.second;
+        const double rightRatio = static_cast<double>(right.key2.first) / right.key2.second;
         
-        if (std::abs(leftRatio - rightRatio) > FLOAT_EPSILON)
+        if (std::abs(leftRatio - rightRatio) > 1e-10)
         {
             return leftRatio < rightRatio;
         }
@@ -42,10 +31,10 @@ namespace dataStruct
             return in;
         }
 
-        char symbol;
-        in >> symbol;
+        char c;
+        in >> c;
 
-        if (in && (symbol != dest.exp))
+        if (in && (c != dest.exp))
         {
             in.setstate(std::ios::failbit);
         }
@@ -60,14 +49,14 @@ namespace dataStruct
             return in;
         }
 
-        double realPart = 0.0;
-        double imagPart = 0.0;
+        double real = 0.0;
+        double imag = 0.0;
         in >> DelimiterIO{'#'} >> DelimiterIO{'c'} >> DelimiterIO{'('}
-           >> realPart >> imagPart >> DelimiterIO{')'};
+           >> real >> imag >> DelimiterIO{')'};
 
         if (in)
         {
-            dest.ref = std::complex<double>(realPart, imagPart);
+            dest.ref = std::complex<double>(real, imag);
         }
         return in;
     }
@@ -93,7 +82,7 @@ namespace dataStruct
         in >> dest.ref;
         if (in.peek() == 'l' || in.peek() == 'L')
         {
-            in.ignore(IGNORE_COUNT);
+            in.ignore(2);
         }
         return in;
     }
@@ -123,38 +112,38 @@ namespace dataStruct
         using ll = LongLongIO;
         using ull = UnsignedLongLongIO;
 
-        bool hasKey1 = false;
-        bool hasKey2 = false;
-        bool hasKey3 = false;
+        bool flagKey1 = false;
+        bool flagKey2 = false;
+        bool flagKey3 = false;
 
         in >> sep{'('};
-        std::string fieldName;
-        while (!hasKey1 || !hasKey2 || !hasKey3)
+        std::string label;
+        while (!flagKey1 || !flagKey2 || !flagKey3)
         {
             if (!in)
             {
                 break;
             }
 
-            if (in >> sep{':'} >> fieldName)
+            if (in >> sep{':'} >> label)
             {
-                if (fieldName == "key1")
+                if (label == "key1")
                 {
                     in >> cmp{input.key1};
-                    hasKey1 = true;
+                    flagKey1 = true;
                 }
-                else if (fieldName == "key2")
+                else if (label == "key2")
                 {
                     in >> sep{'('} >> sep{':'} >> sep{'N'}
                        >> ll{input.key2.first} >> sep{':'}
                        >> sep{'D'} >> ull{input.key2.second}
                        >> sep{':'} >> sep{')'};
-                    hasKey2 = true;
+                    flagKey2 = true;
                 }
-                else if (fieldName == "key3")
+                else if (label == "key3")
                 {
                     in >> str{input.key3};
-                    hasKey3 = true;
+                    flagKey3 = true;
                 }
                 else
                 {
@@ -164,7 +153,7 @@ namespace dataStruct
         }
 
         in >> sep{':'} >> sep{')'};
-        if (in && hasKey1 && hasKey2 && hasKey3)
+        if (in && flagKey1 && flagKey2 && flagKey3)
         {
             dest = input;
         }
@@ -180,26 +169,25 @@ namespace dataStruct
         }
 
         IOFormatGuard guard(out);
-        out << "(:key1 #c(" << std::fixed << std::setprecision(1) 
-            << src.key1.real() << " " << src.key1.imag() << ")"
+        out << "(:key1 #c(" << src.key1.real() << " " << src.key1.imag() << ")"
             << ":key2 (:N " << src.key2.first << ":D " << src.key2.second << ":)"
             << ":key3 \"" << src.key3 << "\":)";
         return out;
     }
 
-    IOFormatGuard::IOFormatGuard(std::basic_ios<char>& stream) :
-        stream_(stream),
-        width_(stream.width()),
-        fill_(stream.fill()),
-        precision_(stream.precision()),
-        flags_(stream.flags())
+    IOFormatGuard::IOFormatGuard(std::basic_ios<char>& s) :
+        s_(s),
+        width_(s.width(0)),
+        fill_(s.fill(' ')),
+        precision_(s.precision(6)),
+        fmt_(s.flags())
     {}
 
     IOFormatGuard::~IOFormatGuard()
     {
-        stream_.width(width_);
-        stream_.fill(fill_);
-        stream_.precision(precision_);
-        stream_.flags(flags_);
+        s_.width(width_);
+        s_.fill(fill_);
+        s_.precision(precision_);
+        s_.flags(fmt_);
     }
 }
