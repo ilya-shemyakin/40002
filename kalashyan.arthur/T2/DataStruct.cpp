@@ -6,7 +6,7 @@ namespace dataStruct
     {
         const double leftAbs = std::abs(left.key1);
         const double rightAbs = std::abs(right.key1);
-        
+
         if (std::abs(leftAbs - rightAbs) > 1e-10)
         {
             return leftAbs < rightAbs;
@@ -14,7 +14,7 @@ namespace dataStruct
 
         const double leftRatio = static_cast<double>(left.key2.first) / left.key2.second;
         const double rightRatio = static_cast<double>(right.key2.first) / right.key2.second;
-        
+
         if (std::abs(leftRatio - rightRatio) > 1e-10)
         {
             return leftRatio < rightRatio;
