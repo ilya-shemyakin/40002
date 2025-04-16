@@ -29,10 +29,10 @@ namespace dataStruct
         if (left.key1 == right.key1)
         {
             unsigned long long greatestCommonDivisor = dataStruct::gcd(left.key2.second, right.key2.second);
-            return left.key2.first * greatestCommonDivisor / left.key2.second < right.key2.first * greatestCommonDivisor / right.key2.second;
+            return left.key2.first * static_cast<long long>(right.key2.second / greatestCommonDivisor) <\
+               right.key2.first * static_cast<long long>(left.key2.second / greatestCommonDivisor);
         }
         return left.key1 < right.key1;
-    }
 
     std::istream& operator>>(std::istream& in, DelimiterIO&& dest)
     {
