@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef DATASTRUCT_H
 #define DATASTRUCT_H
 
@@ -24,6 +26,11 @@ namespace nspace
     struct DelimiterIO
     {
         char exp;
+    };
+
+    struct LongLongIOLL
+    {
+        long long& ref;
     };
 
     struct LongLongIO
@@ -73,4 +80,4 @@ namespace nspace
     std::ostream& operator<<(std::ostream& out, const DataStruct& dest);
 }
 
-#endif //!DATASTRUCT_H
+#endif !DATASTRUCT_H
