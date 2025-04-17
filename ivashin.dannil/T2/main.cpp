@@ -6,11 +6,13 @@
 #include <string>
 #include <vector>
 #include <limits>
+#include <cmath>
+#include <cctype>
 
 struct DataStruct {
-    unsigned long long key1_;
-    unsigned long long key2_;
-    std::string key3_;
+    std::string key1;
+    std::string key2;
+    std::string key3;
 };
 
 class IofmtGuard {
@@ -23,139 +25,145 @@ private:
     std::ios_base::fmtflags flags_;
 };
 
-std::istream& operator>>(std::istream& input, DataStruct& data) {
-    std::istream::sentry sentry(input);
-    if (!sentry) {
-        return input;
-    }
+bool parseValue(std::istream& input, std::string& value) {
+    char c;
+    input >> c;
 
+    if (c == '"') {
+        std::getline(input, value, '"');
+        return true;
+    }
+    else if (c == '#') {
+        if (input.get() != 'c' || input.get() != '(') return false;
+        value = "#c(";
+        std::string part;
+        while (std::getline(input, part, ')')) {
+            value += part;
+            if (!part.empty() && part.back() == ')') break;
+        }
+        value += ")";
+        return true;
+    }
+    else if (c == '(') {
+        value = "(";
+        int depth = 1;
+        while (depth > 0 && input.get(c)) {
+            value += c;
+            if (c == '(') depth++;
+            if (c == ')') depth--;
+        }
+        return depth == 0;
+    }
+    else if (c == '\'') {
+        value = "'";
+        if (input.get(c)) {
+            value += c;
+            if (input.get(c) && c == '\'') {
+                value += "'";
+                return true;
+            }
+        }
+        return false;
+    }
+    else {
+        input.unget();
+        std::string temp;
+        input >> temp;
+        value = temp;
+        return !temp.empty();
+    }
+}
+
+std::istream& operator>>(std::istream& input, DataStruct& data) {
     DataStruct temp;
     char c;
-    std::string token;
 
     if (!(input >> c) || c != '(') {
         input.setstate(std::ios::failbit);
         return input;
     }
 
-    bool valid = true;
-    bool keysPresent[3] = { false, false, false };
+    bool keys[3] = { false };
+    std::string key;
 
-    while (valid && input >> c && c == ':') {
-        if (!(input >> token)) {
-            valid = false;
-            break;
-        }
+    while (input >> c && c == ':') {
+        std::string field;
+        input >> field;
 
-        if (token == "key1" && !keysPresent[0]) {
-            std::string valueStr;
-            if (!(input >> valueStr)) {
-                valid = false;
-                break;
+        if (field == "key1" && !keys[0]) {
+            if (!parseValue(input, temp.key1)) {
+                input.setstate(std::ios::failbit);
+                return input;
             }
-            if (valueStr.size() < 4 ||
-                (valueStr.substr(valueStr.size() - 3) != "ull" && valueStr.substr(valueStr.size() - 3) != "ULL")) {
-                valid = false;
-                break;
-            }
-            std::istringstream iss(valueStr.substr(0, valueStr.size() - 3));
-            unsigned long long value;
-            if (!(iss >> value) || iss.rdbuf()->in_avail() > 0) {
-                valid = false;
-                break;
-            }
-            temp.key1_ = value;
-            keysPresent[0] = true;
+            keys[0] = true;
         }
-        else if (token == "key2" && !keysPresent[1]) {
-            std::string hexString;
-            if (!(input >> hexString)) {
-                valid = false;
-                break;
+        else if (field == "key2" && !keys[1]) {
+            if (!parseValue(input, temp.key2)) {
+                input.setstate(std::ios::failbit);
+                return input;
             }
-            if (hexString.size() < 3 || hexString.substr(0, 2) != "0x") {
-                valid = false;
-                break;
-            }
-            std::istringstream iss(hexString.substr(2));
-            unsigned long long value;
-            if (!(iss >> std::hex >> value) || iss.rdbuf()->in_avail() > 0) {
-                valid = false;
-                break;
-            }
-            temp.key2_ = value;
-            keysPresent[1] = true;
+            keys[1] = true;
         }
-        else if (token == "key3" && !keysPresent[2]) {
-            input >> std::ws;
-            if (input.get() != '"') {
-                valid = false;
-                break;
+        else if (field == "key3" && !keys[2]) {
+            std::string val;
+            if (!parseValue(input, val) || val.size() < 2 || val.front() != '"' || val.back() != '"') {
+                input.setstate(std::ios::failbit);
+                return input;
             }
-            std::getline(input, temp.key3_, '"');
-            if (input.fail()) {
-                valid = false;
-                break;
-            }
-            keysPresent[2] = true;
+            temp.key3 = val.substr(1, val.size() - 2);
+            keys[2] = true;
         }
         else {
-            valid = false;
-            break;
+            input.setstate(std::ios::failbit);
+            return input;
         }
     }
-    if (valid && input >> c && c == ')' && keysPresent[0] && keysPresent[1] && keysPresent[2]) {
+
+    if (c == ')' && keys[0] && keys[1] && keys[2]) {
         data = temp;
-    }
-    else {
-        input.setstate(std::ios::failbit);
+        return input;
     }
 
+    input.setstate(std::ios::failbit);
     return input;
 }
 
 std::ostream& operator<<(std::ostream& output, const DataStruct& data) {
-    std::ostream::sentry sentry(output);
-    if (!sentry) {
-        return output;
-    }
-
-    IofmtGuard guard(output);
-    output << "(:key1 " << data.key1_ << "ull:key2 0x" << std::hex << std::uppercase
-        << data.key2_ << std::dec << ":key3 \"" << data.key3_ << "\":)";
+    output << "(:key1 " << data.key1
+        << ":key2 " << data.key2
+        << ":key3 \"" << data.key3 << "\":)";
     return output;
 }
 
-bool compareData(const DataStruct& first, const DataStruct& second) {
-    if (first.key1_ != second.key1_) {
-        return first.key1_ < second.key1_;
-    }
-    if (first.key2_ != second.key2_) {
-        return first.key2_ < second.key2_;
-    }
-    return first.key3_.length() < second.key3_.length();
+bool compareData(const DataStruct& a, const DataStruct& b) {
+    if (a.key1 != b.key1) return a.key1 < b.key1;
+    if (a.key2 != b.key2) return a.key2 < b.key2;
+    return a.key3.length() < b.key3.length();
 }
 
 int main() {
     std::vector<DataStruct> data;
-    bool hasValidRecord = false;
+    bool hasValid = false;
 
-    while (!std::cin.eof()) {
+    while (true) {
         DataStruct temp;
-        if (std::cin >> temp) { // Читаем запись
+        if (std::cin >> temp) {
             data.push_back(temp);
-            hasValidRecord = true;
+            hasValid = true;
         }
-        else { // Если чтение не удалось
-            std::cin.clear(); // Сбрасываем состояние
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Пропускаем строку
+        else {
+            if (std::cin.eof()) break;
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         }
     }
 
-    if (hasValidRecord) {
+    if (hasValid) {
         std::cout << "Atleast one supported record type\n";
         std::sort(data.begin(), data.end(), compareData);
-        std::copy(data.begin(), data.end(), std::ostream_iterator<DataStruct>(std::cout, "\n"));
+        for (const auto& item : data) {
+            std::cout << item << "\n";
+        }
     }
     else {
         std::cout << "Looks like there is no supported record. Cannot determine input. Test skipped\n";
