@@ -12,91 +12,105 @@ struct DataStruct {
     std::string key3_;
 };
 
-// Класс для сохранения и восстановления формата потока
 class IofmtGuard {
 public:
     IofmtGuard(std::basic_ios<char>& stream) : stream_(stream), flags_(stream.flags()) {}
     ~IofmtGuard() { stream_.flags(flags_); }
+
 private:
     std::basic_ios<char>& stream_;
     std::ios_base::fmtflags flags_;
 };
 
-bool parseDataStruct(const std::string& line, DataStruct& data) {
-    std::istringstream iss(line);
-    char c;
-    if (!(iss >> c) || c != '(') {
-        return false;
+std::istream& operator>>(std::istream& input, DataStruct& data) {
+    std::istream::sentry sentry(input);
+    if (!sentry) {
+        return input;
     }
 
     DataStruct temp;
+    char c;
+    std::string token;
+
+    if (!(input >> c) || c != '(') {
+        input.setstate(std::ios::failbit);
+        return input;
+    }
+
+    bool valid = true;
     bool keysPresent[3] = { false, false, false };
 
-    while (iss.peek() == ':') {
-        iss.ignore(1, ':'); // Пропускаем ':'
-        if (iss.peek() == ')') {
-            break; 
+    while (valid && input >> c && c == ':') {
+        if (!(input >> token)) {
+            valid = false;
+            break;
         }
-        std::string token;
-        if (!(iss >> token)) {
-            return false;
-        }
+
         if (token == "key1" && !keysPresent[0]) {
             std::string valueStr;
-            if (!(iss >> valueStr)) {
-                return false;
+            if (!(input >> valueStr)) {
+                valid = false;
+                break;
             }
-            // Проверка формата ULL LIT
             if (valueStr.size() < 4 ||
                 (valueStr.substr(valueStr.size() - 3) != "ull" && valueStr.substr(valueStr.size() - 3) != "ULL")) {
-                return false;
+                valid = false;
+                break;
             }
-            std::istringstream numIss(valueStr.substr(0, valueStr.size() - 3));
+            std::istringstream iss(valueStr.substr(0, valueStr.size() - 3));
             unsigned long long value;
-            if (!(numIss >> value) || numIss.rdbuf()->in_avail() > 0) {
-                return false;
+            if (!(iss >> value) || iss.rdbuf()->in_avail() > 0) {
+                valid = false;
+                break;
             }
             temp.key1_ = value;
             keysPresent[0] = true;
         }
         else if (token == "key2" && !keysPresent[1]) {
             std::string hexString;
-            if (!(iss >> hexString)) {
-                return false;
+            if (!(input >> hexString)) {
+                valid = false;
+                break;
             }
-            // Проверка формата ULL HEX
             if (hexString.size() < 3 || hexString.substr(0, 2) != "0x") {
-                return false;
+                valid = false;
+                break;
             }
-            std::istringstream numIss(hexString.substr(2));
+            std::istringstream iss(hexString.substr(2));
             unsigned long long value;
-            if (!(numIss >> std::hex >> value) || numIss.rdbuf()->in_avail() > 0) {
-                return false;
+            if (!(iss >> std::hex >> value) || iss.rdbuf()->in_avail() > 0) {
+                valid = false;
+                break;
             }
             temp.key2_ = value;
             keysPresent[1] = true;
         }
         else if (token == "key3" && !keysPresent[2]) {
-            iss >> std::ws;
-            if (iss.get() != '"') {
-                return false;
+            input >> std::ws;
+            if (input.get() != '"') {
+                valid = false;
+                break;
             }
-            std::getline(iss, temp.key3_, '"');
-            if (iss.fail()) {
-                return false;
+            std::getline(input, temp.key3_, '"');
+            if (input.fail()) {
+                valid = false;
+                break;
             }
             keysPresent[2] = true;
         }
         else {
-            return false;
+            valid = false;
+            break;
         }
     }
-
-    if (iss >> c && c == ')' && keysPresent[0] && keysPresent[1] && keysPresent[2]) {
+    if (valid && input >> c && c == ')' && keysPresent[0] && keysPresent[1] && keysPresent[2]) {
         data = temp;
-        return true;
     }
-    return false;
+    else {
+        input.setstate(std::ios::failbit);
+    }
+
+    return input;
 }
 
 std::ostream& operator<<(std::ostream& output, const DataStruct& data) {
@@ -104,6 +118,7 @@ std::ostream& operator<<(std::ostream& output, const DataStruct& data) {
     if (!sentry) {
         return output;
     }
+
     IofmtGuard guard(output);
     output << "(:key1 " << data.key1_ << "ull:key2 0x" << std::hex << std::uppercase
         << data.key2_ << std::dec << ":key3 \"" << data.key3_ << "\":)";
@@ -123,13 +138,30 @@ bool compareData(const DataStruct& first, const DataStruct& second) {
 int main() {
     std::vector<DataStruct> data;
     bool hasValidRecord = false;
-    std::string line;
 
-    while (std::getline(std::cin, line)) {
+    while (!std::cin.eof()) {
         DataStruct temp;
-        if (parseDataStruct(line, temp)) {
+        std::cin >> temp;
+        if (std::cin.good()) {
             data.push_back(temp);
             hasValidRecord = true;
+        }
+        else if (!std::cin.eof()) {
+            std::cin.clear();
+            char c;
+            while (std::cin.get(c) && c != ')' && c != '\n') {
+                if (c == '(') {
+                    int parenCount = 1;
+                    while (std::cin.get(c) && parenCount > 0) {
+                        if (c == '(') parenCount++;
+                        if (c == ')') parenCount--;
+                    }
+                    break;
+                }
+            }
+            if (c == ')') {
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            }
         }
     }
 
