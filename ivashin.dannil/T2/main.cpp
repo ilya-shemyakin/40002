@@ -103,31 +103,11 @@ std::istream& operator>>(std::istream& input, DataStruct& data) {
             valid = false;
             break;
         }
-
-        if (keysPresent[0] && keysPresent[1] && keysPresent[2]) {
-            break;
-        }
     }
-
-    if (valid && keysPresent[0] && keysPresent[1] && keysPresent[2]) {
-        // Read the trailing colon and closing parenthesis
-        if (input >> c && c == ':') {
-            if (input >> c && c == ')') {
-                data = temp;
-            }
-            else {
-                valid = false;
-            }
-        }
-        else {
-            valid = false;
-        }
+    if (valid && input >> c && c == ')' && keysPresent[0] && keysPresent[1] && keysPresent[2]) {
+        data = temp;
     }
     else {
-        valid = false;
-    }
-
-    if (!valid) {
         input.setstate(std::ios::failbit);
     }
 
@@ -162,13 +142,13 @@ int main() {
 
     while (!std::cin.eof()) {
         DataStruct temp;
-        if (std::cin >> temp) {
+        if (std::cin >> temp) { // Читаем запись
             data.push_back(temp);
             hasValidRecord = true;
         }
-        else {
-            std::cin.clear();
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        else { // Если чтение не удалось
+            std::cin.clear(); // Сбрасываем состояние
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Пропускаем строку
         }
     }
 
