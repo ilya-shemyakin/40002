@@ -12,7 +12,6 @@ struct DataStruct {
     std::string key3_;
 };
 
-// Class to save and restore stream format
 class IofmtGuard {
 public:
     IofmtGuard(std::basic_ios<char>& stream) : stream_(stream), flags_(stream.flags()) {}
@@ -23,7 +22,6 @@ private:
     std::ios_base::fmtflags flags_;
 };
 
-// Input operator for DataStruct
 std::istream& operator>>(std::istream& input, DataStruct& data) {
     std::istream::sentry sentry(input);
     if (!sentry) {
@@ -31,17 +29,17 @@ std::istream& operator>>(std::istream& input, DataStruct& data) {
     }
 
     DataStruct temp;
-    std::vector<bool> keysPresent(3, false);
     char c;
     std::string token;
 
-    // Expect opening parenthesis
     if (!(input >> c) || c != '(') {
         input.setstate(std::ios::failbit);
         return input;
     }
 
     bool valid = true;
+    bool keysPresent[3] = { false, false, false };
+
     while (valid && input >> c && c == ':') {
         if (!(input >> token)) {
             valid = false;
@@ -54,7 +52,7 @@ std::istream& operator>>(std::istream& input, DataStruct& data) {
                 valid = false;
                 break;
             }
-            // Check for ULL LIT format (e.g., "123ull" or "123ULL")
+            // Проверка формата ULL LIT (например, "123ull" или "123ULL")
             if (valueStr.size() < 4 ||
                 (valueStr.substr(valueStr.size() - 3) != "ull" && valueStr.substr(valueStr.size() - 3) != "ULL")) {
                 valid = false;
@@ -62,7 +60,7 @@ std::istream& operator>>(std::istream& input, DataStruct& data) {
             }
             std::istringstream iss(valueStr.substr(0, valueStr.size() - 3));
             unsigned long long value;
-            if (!(iss >> value)) {
+            if (!(iss >> value) || iss.rdbuf()->in_avail() > 0) { // Проверка на лишние символы
                 valid = false;
                 break;
             }
@@ -75,14 +73,14 @@ std::istream& operator>>(std::istream& input, DataStruct& data) {
                 valid = false;
                 break;
             }
-            // Check for ULL HEX format (e.g., "0xFFA")
+            // Проверка формата ULL HEX (например, "0xFFA")
             if (hexString.size() < 3 || hexString.substr(0, 2) != "0x") {
                 valid = false;
                 break;
             }
             std::istringstream iss(hexString.substr(2));
             unsigned long long value;
-            if (!(iss >> std::hex >> value)) {
+            if (!(iss >> std::hex >> value) || iss.rdbuf()->in_avail() > 0) { // Проверка на лишние символы
                 valid = false;
                 break;
             }
@@ -90,12 +88,16 @@ std::istream& operator>>(std::istream& input, DataStruct& data) {
             keysPresent[1] = true;
         }
         else if (token == "key3" && !keysPresent[2]) {
-            input >> std::ws;
+            input >> std::ws; // Пропуск пробелов
             if (input.get() != '"') {
                 valid = false;
                 break;
             }
             std::getline(input, temp.key3_, '"');
+            if (input.fail()) {
+                valid = false;
+                break;
+            }
             keysPresent[2] = true;
         }
         else {
@@ -103,8 +105,6 @@ std::istream& operator>>(std::istream& input, DataStruct& data) {
             break;
         }
     }
-
-    // Check for closing parenthesis and all keys present
     if (valid && input >> c && c == ')' && keysPresent[0] && keysPresent[1] && keysPresent[2]) {
         data = temp;
     }
@@ -115,7 +115,6 @@ std::istream& operator>>(std::istream& input, DataStruct& data) {
     return input;
 }
 
-// Output operator for DataStruct
 std::ostream& operator<<(std::ostream& output, const DataStruct& data) {
     std::ostream::sentry sentry(output);
     if (!sentry) {
@@ -128,7 +127,6 @@ std::ostream& operator<<(std::ostream& output, const DataStruct& data) {
     return output;
 }
 
-// Comparator for sorting
 bool compareData(const DataStruct& first, const DataStruct& second) {
     if (first.key1_ != second.key1_) {
         return first.key1_ < second.key1_;
@@ -144,23 +142,17 @@ int main() {
     bool hasValidRecord = false;
 
     while (!std::cin.eof()) {
-        std::istream::pos_type startPos = std::cin.tellg();
         DataStruct temp;
         std::cin >> temp;
-        if (std::cin) {
+        if (std::cin.good()) {
             data.push_back(temp);
             hasValidRecord = true;
         }
-        else {
+        else if (!std::cin.eof()) {
             std::cin.clear();
-            if (startPos != -1) {
-                std::cin.seekg(startPos);
-            }
-            // Skip to the next line or closing parenthesis
             char c;
-            while (std::cin.get(c) && c != '\n' && c != ')') {
+            while (std::cin.get(c) && c != ')' && c != '\n') {
                 if (c == '(') {
-                    // Consume until closing parenthesis
                     int parenCount = 1;
                     while (std::cin.get(c) && parenCount > 0) {
                         if (c == '(') parenCount++;
