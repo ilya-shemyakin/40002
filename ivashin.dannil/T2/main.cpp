@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <limits>
 
 struct DataStruct {
     unsigned long long key1_;
@@ -141,27 +142,13 @@ int main() {
 
     while (!std::cin.eof()) {
         DataStruct temp;
-        std::cin >> temp;
-        if (std::cin.good()) {
+        if (std::cin >> temp) { // Читаем запись
             data.push_back(temp);
             hasValidRecord = true;
         }
-        else if (!std::cin.eof()) {
-            std::cin.clear();
-            char c;
-            while (std::cin.get(c) && c != ')' && c != '\n') {
-                if (c == '(') {
-                    int parenCount = 1;
-                    while (std::cin.get(c) && parenCount > 0) {
-                        if (c == '(') parenCount++;
-                        if (c == ')') parenCount--;
-                    }
-                    break;
-                }
-            }
-            if (c == ')') {
-                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            }
+        else { // Если чтение не удалось
+            std::cin.clear(); // Сбрасываем состояние
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Пропускаем строку
         }
     }
 
