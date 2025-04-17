@@ -1,4 +1,5 @@
 ﻿#include <algorithm>
+#include <charconv>
 #include <iomanip>
 #include <iostream>
 #include <iterator>
@@ -10,8 +11,8 @@
 #include <cctype>
 
 struct DataStruct {
-    std::string key1;
-    std::string key2;
+    unsigned long long key1;
+    unsigned long long key2;
     std::string key3;
 };
 
@@ -25,113 +26,118 @@ private:
     std::ios_base::fmtflags flags_;
 };
 
-bool parseValue(std::istream& input, std::string& value) {
-    char c;
-    input >> c;
+bool parseNumber(std::string str, unsigned long long& result) {
+    // Удаляем суффиксы
+    if (str.size() > 2) {
+        const std::string suffix = str.substr(str.size() - 3);
+        if (suffix == "ull" || suffix == "ULL") {
+            str = str.substr(0, str.size() - 3);
+        }
+    }
 
-    if (c == '"') {
-        std::getline(input, value, '"');
-        return true;
-    }
-    else if (c == '#') {
-        if (input.get() != 'c' || input.get() != '(') return false;
-        value = "#c(";
-        std::string part;
-        while (std::getline(input, part, ')')) {
-            value += part;
-            if (!part.empty() && part.back() == ')') break;
+    if (str.size() > 1) {
+        const std::string suffix = str.substr(str.size() - 2);
+        if (suffix == "ll" || suffix == "LL") {
+            str = str.substr(0, str.size() - 2);
         }
-        value += ")";
-        return true;
-    }
-    else if (c == '(') {
-        value = "(";
-        int depth = 1;
-        while (depth > 0 && input.get(c)) {
-            value += c;
-            if (c == '(') depth++;
-            if (c == ')') depth--;
+        else if (str.back() == 'd' || str.back() == 'D') {
+            str = str.substr(0, str.size() - 1);
         }
-        return depth == 0;
     }
-    else if (c == '\'') {
-        value = "'";
-        if (input.get(c)) {
-            value += c;
-            if (input.get(c) && c == '\'') {
-                value += "'";
-                return true;
-            }
+
+    // Парсим разные системы счисления
+    int base = 10;
+    if (str.size() > 1 && str[0] == '0') {
+        if (str[1] == 'x' || str[1] == 'X') {
+            base = 16;
+            str = str.substr(2);
         }
-        return false;
+        else if (str[1] == 'b' || str[1] == 'B') {
+            base = 2;
+            str = str.substr(2);
+        }
+        else if (isdigit(str[1])) {
+            base = 8;
+            str = str.substr(1);
+        }
     }
-    else {
-        input.unget();
-        std::string temp;
-        input >> temp;
-        value = temp;
-        return !temp.empty();
-    }
+
+    auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), result, base);
+    return ec == std::errc() && ptr == str.data() + str.size();
 }
 
 std::istream& operator>>(std::istream& input, DataStruct& data) {
     DataStruct temp;
     char c;
+    std::string token;
 
-    if (!(input >> c) || c != '(') {
+    if (!(input >> std::ws >> c) || c != '(') {
         input.setstate(std::ios::failbit);
         return input;
     }
 
     bool keys[3] = { false };
-    std::string key;
+    bool valid = true;
 
-    while (input >> c && c == ':') {
-        std::string field;
-        input >> field;
+    while (valid && input >> std::ws >> c && c == ':') {
+        if (!(input >> token)) {
+            valid = false;
+            break;
+        }
 
-        if (field == "key1" && !keys[0]) {
-            if (!parseValue(input, temp.key1)) {
-                input.setstate(std::ios::failbit);
-                return input;
+        if (token == "key1" && !keys[0]) {
+            std::string value;
+            if (input >> value) {
+                if (!parseNumber(value, temp.key1)) {
+                    valid = false;
+                }
+                else {
+                    keys[0] = true;
+                }
             }
-            keys[0] = true;
         }
-        else if (field == "key2" && !keys[1]) {
-            if (!parseValue(input, temp.key2)) {
-                input.setstate(std::ios::failbit);
-                return input;
+        else if (token == "key2" && !keys[1]) {
+            std::string value;
+            if (input >> value) {
+                if (!parseNumber(value, temp.key2)) {
+                    valid = false;
+                }
+                else {
+                    keys[1] = true;
+                }
             }
-            keys[1] = true;
         }
-        else if (field == "key3" && !keys[2]) {
-            std::string val;
-            if (!parseValue(input, val) || val.size() < 2 || val.front() != '"' || val.back() != '"') {
-                input.setstate(std::ios::failbit);
-                return input;
+        else if (token == "key3" && !keys[2]) {
+            input >> std::ws;
+            if (input.get() != '"') {
+                valid = false;
+                break;
             }
-            temp.key3 = val.substr(1, val.size() - 2);
+            std::getline(input, temp.key3, '"');
             keys[2] = true;
         }
         else {
-            input.setstate(std::ios::failbit);
-            return input;
+            valid = false;
+            break;
         }
     }
 
-    if (c == ')' && keys[0] && keys[1] && keys[2]) {
+    if (valid && keys[0] && keys[1] && keys[2] &&
+        input && c == ')' && (input >> std::ws).eof()) {
         data = temp;
-        return input;
+    }
+    else {
+        input.setstate(std::ios::failbit);
     }
 
-    input.setstate(std::ios::failbit);
     return input;
 }
 
 std::ostream& operator<<(std::ostream& output, const DataStruct& data) {
-    output << "(:key1 " << data.key1
-        << ":key2 " << data.key2
-        << ":key3 \"" << data.key3 << "\":)";
+    IofmtGuard guard(output);
+    output << "(:key1 " << data.key1 << "ull"
+        << ":key2 0x" << std::hex << std::uppercase << data.key2
+        << std::dec << ":key3 \"" << data.key3 << "\":)";
     return output;
 }
 
@@ -161,9 +167,8 @@ int main() {
     if (hasValid) {
         std::cout << "Atleast one supported record type\n";
         std::sort(data.begin(), data.end(), compareData);
-        for (const auto& item : data) {
-            std::cout << item << "\n";
-        }
+        std::copy(data.begin(), data.end(),
+            std::ostream_iterator<DataStruct>(std::cout, "\n"));
     }
     else {
         std::cout << "Looks like there is no supported record. Cannot determine input. Test skipped\n";
