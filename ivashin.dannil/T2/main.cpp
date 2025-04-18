@@ -7,6 +7,7 @@
 #include <string>
 #include <iomanip>
 #include <limits>
+#include <cctype>
 
 namespace educational {
 
@@ -17,7 +18,7 @@ namespace educational {
     };
 
     // Вспомогательные структуры для обработки ввода
-    struct DelimiterIO { char exp; };
+    struct DelimiterIO { std::string exp; };
     struct ULLLitIO { unsigned long long& value; };
     struct ULLHexIO { unsigned long long& value; };
     struct StringIO { std::string& ref; };
@@ -46,9 +47,15 @@ namespace educational {
     std::istream& operator>>(std::istream& in, DelimiterIO&& dest) {
         std::istream::sentry sentry(in);
         if (!sentry) return in;
-        char c;
-        in >> c;
-        if (c != dest.exp) in.setstate(std::ios::failbit);
+        std::string input;
+        for (char c : dest.exp) {
+            in.get(c);
+            input += c;
+            if (!in || c != dest.exp[input.size() - 1]) {
+                in.setstate(std::ios::failbit);
+                return in;
+            }
+        }
         return in;
     }
 
@@ -63,7 +70,6 @@ namespace educational {
             return in;
         }
         std::string suffix = str.substr(str.size() - 3);
-        // Приводим суффикс к нижнему регистру для проверки
         for (char& c : suffix) c = std::tolower(c);
         if (suffix != "ull") {
             in.setstate(std::ios::failbit);
@@ -97,7 +103,6 @@ namespace educational {
         return in;
     }
 
-    // Оператор ввода для строки
     std::istream& operator>>(std::istream& in, StringIO&& dest) {
         std::istream::sentry sentry(in);
         if (!sentry) return in;
@@ -118,7 +123,7 @@ namespace educational {
         DataStruct tmp;
         bool has_key1 = false, has_key2 = false, has_key3 = false;
 
-        in >> DelimiterIO{ '(' } >> DelimiterIO{ ':' };
+        in >> DelimiterIO{ "(:" };
 
         while (true) {
             std::string key;
@@ -129,7 +134,7 @@ namespace educational {
                 break;
             }
 
-            in >> DelimiterIO{ ' ' };
+            in >> DelimiterIO{ " " };
 
             if (key == "key1") {
                 if (has_key1) {
@@ -160,8 +165,7 @@ namespace educational {
                 break;
             }
 
-            // Проверяем разделитель
-            in >> DelimiterIO{ ':' };
+            in >> DelimiterIO{ ":" };
             if (in.fail()) break;
         }
 
@@ -176,12 +180,13 @@ namespace educational {
         // Пропускаем некорректные данные до следующей записи
         if (in.fail()) {
             in.clear();
-            in.ignore(std::numeric_limits<std::streamsize>::max(), '(');
+            in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         }
 
         return in;
     }
 
+    // Оператор вывода для DataStruct
     std::ostream& operator<<(std::ostream& out, const DataStruct& src) {
         std::ostream::sentry sentry(out);
         if (!sentry) return out;
@@ -205,6 +210,14 @@ int main() {
     std::copy(std::istream_iterator<educational::DataStruct>(std::cin),
         std::istream_iterator<educational::DataStruct>(),
         std::back_inserter(data));
+
+    // Проверка наличия валидных записей
+    if (data.empty()) {
+        std::cout << "Looks like there is no supported record. Cannot determine input. Test skipped\n";
+        return 0;
+    }
+
+    std::cout << "Atleast one supported record type\n";
 
     std::sort(data.begin(), data.end(), educational::compare);
 
