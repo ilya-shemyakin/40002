@@ -189,7 +189,7 @@ namespace nspace {
     }
 
     // Вывод DataStruct
-    std::ostream& operator>>(std::ostream& out, const DataStruct& data) {
+    std::ostream& operator<<(std::ostream& out, const DataStruct& data) {
         std::ostream::sentry sentry(out);
         if (!sentry) return out;
         iofmtguard guard(out);
