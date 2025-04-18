@@ -105,13 +105,11 @@ std::istream& operator>>(std::istream& input, DataStruct& data) {
             keys[1] = true;
         }
         else if (field == "key3" && !keys[2]) {
-            std::string val;
-            if (!parseValue(input, val) || val.size() < 2 || val.front() != '"' || val.back() != '"') {
+            if (!parseValue(input, temp.key3)) {
                 input.setstate(std::ios::failbit);
                 return input;
             }
-            temp.key3 = val.substr(1, val.size() - 2);
-            keys[2] = true;
+            keys[2] = true;     
         }
         else {
             input.setstate(std::ios::failbit);
