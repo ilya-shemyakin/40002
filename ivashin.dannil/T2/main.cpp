@@ -147,20 +147,16 @@ namespace nspace {
         while (in) {
             std::string key;
             in >> key;
-            if (in.fail()) {
-                in.setstate(std::ios::failbit);
-                break;
-            }
+            if (in.fail()) break;
 
             if (key == ":)") {
                 if (hasKey1 && hasKey2 && hasKey3) {
-                    dest = tmp; // Присваиваем только при успешном парсинге всех ключей
-                    return in;
+                    dest = tmp; // Присваиваем только при успешном парсинге
                 }
                 else {
                     in.setstate(std::ios::failbit);
-                    break;
                 }
+                break;
             }
 
             in >> DelimiterIO{ " " };
@@ -185,7 +181,7 @@ namespace nspace {
             else if (key == "key3") {
                 if (hasKey3) {
                     in.setstate(std::ios::failbit);
-                    break];
+                    break;
                 }
                 in >> StringIO{ tmp.key3 };
                 hasKey3 = in.good();
@@ -199,10 +195,11 @@ namespace nspace {
             if (in.fail()) break;
         }
 
-        // Если парсинг не завершился успешно, устанавливаем failbit
-        in.setstate(std::ios::failbit);
-        in.clear();
-        in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        if (in.fail()) { // Пропуск некорректных данных
+            in.clear();
+            in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
+
         return in;
     }
 
