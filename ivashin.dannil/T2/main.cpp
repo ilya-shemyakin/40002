@@ -225,4 +225,6 @@ int main() {
         std::ostream_iterator<educational::DataStruct>(std::cout, "\n"));
 
     return 0;
+
 }
+
