@@ -16,7 +16,7 @@ namespace nspace {
         std::string key3;
     };
 
-    struct DelimiterIO { std::string exp; }; // Изменено на строку для поддержки составных разделителей
+    struct DelimiterIO { std::string exp; };
     struct ULLLitIO { unsigned long long& value; };
     struct ULLHexIO { unsigned long long& value; };
     struct StringIO { std::string& ref; };
@@ -45,7 +45,7 @@ namespace nspace {
         s_.flags(fmt_);
     }
 
-    // Оператор ввода для разделителей (поддержка строковых разделителей)
+    // Чтение разделителей (строковых)
     std::istream& operator>>(std::istream& in, DelimiterIO&& dest) {
         std::istream::sentry sentry(in);
         if (!sentry) return in;
@@ -62,7 +62,7 @@ namespace nspace {
         return in;
     }
 
-    // Оператор ввода для ULL LIT
+    // Чтение ULL LIT
     std::istream& operator>>(std::istream& in, ULLLitIO&& dest) {
         std::istream::sentry sentry(in);
         if (!sentry) return in;
@@ -87,13 +87,14 @@ namespace nspace {
         return in;
     }
 
-    // Оператор ввода для ULL HEX
+    // Чтение ULL HEX
     std::istream& operator>>(std::istream& in, ULLHexIO&& dest) {
         std::istream::sentry sentry(in);
         if (!sentry) return in;
         std::string str;
         in >> str;
-        if (str.size() < 2 || (str.substr(0, 2) != "0x" && str.substr(0, 2) != "0X")) {
+        if (str.size() < 2 || (str.substr(0, 2) != "0x" &&
+            str.substr(0, 2) != "0X")) {
             in.setstate(std::ios::failbit);
             return in;
         }
@@ -106,7 +107,7 @@ namespace nspace {
         return in;
     }
 
-    // Оператор ввода для строки
+    // Чтение строки
     std::istream& operator>>(std::istream& in, StringIO&& dest) {
         std::istream::sentry sentry(in);
         if (!sentry) return in;
@@ -120,7 +121,7 @@ namespace nspace {
         return in;
     }
 
-    // Оператор ввода для DataStruct
+    // Чтение DataStruct
     std::istream& operator>>(std::istream& in, DataStruct& dest) {
         std::istream::sentry sentry(in);
         if (!sentry) return in;
@@ -128,18 +129,14 @@ namespace nspace {
         DataStruct tmp;
         bool hasKey1 = false, hasKey2 = false, hasKey3 = false;
 
-        // Читаем начальный разделитель
-        in >> DelimiterIO{ "(:" };
+        in >> DelimiterIO{ "(:" }; // Начальный разделитель
 
         while (true) {
             std::string key;
             in >> key;
             if (in.fail()) break;
 
-            // Проверяем завершение записи
-            if (key == ":)") {
-                break;
-            }
+            if (key == ":)") break; // Завершение записи
 
             in >> DelimiterIO{ " " };
 
@@ -172,12 +169,10 @@ namespace nspace {
                 break;
             }
 
-            // Проверяем разделитель
-            in >> DelimiterIO{ ":" };
+            in >> DelimiterIO{ ":" }; // Разделитель между полями
             if (in.fail()) break;
         }
 
-        // Проверяем, что все поля прочитаны
         if (in && hasKey1 && hasKey2 && hasKey3) {
             dest = tmp;
         }
@@ -185,8 +180,7 @@ namespace nspace {
             in.setstate(std::ios::failbit);
         }
 
-        // Пропускаем некорректные данные до конца строки
-        if (in.fail()) {
+        if (in.fail()) { // Пропуск некорректных данных
             in.clear();
             in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         }
@@ -194,13 +188,14 @@ namespace nspace {
         return in;
     }
 
-    // Оператор вывода для DataStruct
-    std::ostream& operator<<(std::ostream& out, const DataStruct& data) {
+    // Вывод DataStruct
+    std::ostream& operator>>(std::ostream& out, const DataStruct& data) {
         std::ostream::sentry sentry(out);
         if (!sentry) return out;
         iofmtguard guard(out);
-        out << "(:key1 " << data.key1 << "ull:key2 0x" << std::uppercase << std::hex << data.key2
-            << std::dec << ":key3 \"" << data.key3 << "\":)";
+        out << "(:key1 " << data.key1 << "ull:key2 0x";
+        out << std::uppercase << std::hex << data.key2;
+        out << std::dec << ":key3 \"" << data.key3 << "\":)";
         return out;
     }
 
@@ -215,24 +210,25 @@ bool compare(const nspace::DataStruct& a, const nspace::DataStruct& b) {
 int main() {
     std::vector<nspace::DataStruct> data;
 
-    // Чтение данных с использованием итераторов
+    // Чтение данных
     std::copy(std::istream_iterator<nspace::DataStruct>(std::cin),
         std::istream_iterator<nspace::DataStruct>(),
         std::back_inserter(data));
 
-    // Проверка на наличие валидных записей
+    // Проверка на отсутствие валидных записей
     if (data.empty()) {
-        std::cout << "Looks like there is no supported record. Cannot determine input. Test skipped\n";
+        std::cout << "Looks like there is no supported record. ";
+        std::cout << "Cannot determine input. Test skipped\n";
         return 0;
     }
 
-    // Вывод сообщения для теста "Atleast One Record Supported"
+    // Сообщение о наличии записей
     std::cout << "Atleast one supported record type\n";
 
-    // Сортировка данных
+    // Сортировка
     std::sort(data.begin(), data.end(), compare);
 
-    // Вывод отсортированных данных
+    // Вывод результатов
     std::copy(data.begin(), data.end(),
         std::ostream_iterator<nspace::DataStruct>(std::cout, "\n"));
 
