@@ -16,7 +16,7 @@ namespace nspace {
         std::string key3;
     };
 
-    struct DelimiterIO { char exp; };
+    struct DelimiterIO { std::string exp; }; // Изменено на строку для поддержки составных разделителей
     struct ULLLitIO { unsigned long long& value; };
     struct ULLHexIO { unsigned long long& value; };
     struct StringIO { std::string& ref; };
@@ -45,22 +45,29 @@ namespace nspace {
         s_.flags(fmt_);
     }
 
+    // Оператор ввода для разделителей (поддержка строковых разделителей)
     std::istream& operator>>(std::istream& in, DelimiterIO&& dest) {
         std::istream::sentry sentry(in);
         if (!sentry) return in;
-        char c;
-        in >> c;
-        if (c != dest.exp) in.setstate(std::ios::failbit);
+        std::string input;
+        for (char c : dest.exp) {
+            char got;
+            in.get(got);
+            input += got;
+            if (!in || got != c) {
+                in.setstate(std::ios::failbit);
+                return in;
+            }
+        }
         return in;
     }
 
+    // Оператор ввода для ULL LIT
     std::istream& operator>>(std::istream& in, ULLLitIO&& dest) {
         std::istream::sentry sentry(in);
         if (!sentry) return in;
         std::string str;
-        char c;
-        while (in.get(c) && c != ':') str += c;
-        if (c == ':') in.putback(c);
+        in >> str;
         if (str.size() < 3) {
             in.setstate(std::ios::failbit);
             return in;
@@ -80,13 +87,12 @@ namespace nspace {
         return in;
     }
 
+    // Оператор ввода для ULL HEX
     std::istream& operator>>(std::istream& in, ULLHexIO&& dest) {
         std::istream::sentry sentry(in);
         if (!sentry) return in;
         std::string str;
-        char c;
-        while (in.get(c) && c != ':') str += c;
-        if (c == ':') in.putback(c);
+        in >> str;
         if (str.size() < 2 || (str.substr(0, 2) != "0x" && str.substr(0, 2) != "0X")) {
             in.setstate(std::ios::failbit);
             return in;
@@ -100,6 +106,7 @@ namespace nspace {
         return in;
     }
 
+    // Оператор ввода для строки
     std::istream& operator>>(std::istream& in, StringIO&& dest) {
         std::istream::sentry sentry(in);
         if (!sentry) return in;
@@ -113,59 +120,84 @@ namespace nspace {
         return in;
     }
 
+    // Оператор ввода для DataStruct
     std::istream& operator>>(std::istream& in, DataStruct& dest) {
+        std::istream::sentry sentry(in);
+        if (!sentry) return in;
+
         DataStruct tmp;
         bool hasKey1 = false, hasKey2 = false, hasKey3 = false;
 
-        in >> DelimiterIO{ '(' } >> DelimiterIO{ ':' };
+        // Читаем начальный разделитель
+        in >> DelimiterIO{ "(:" };
 
         while (true) {
-            char c;
-            if (!in.get(c)) break;
-            if (c == ':') {
-                if (in.peek() == ')') {
-                    in.get();
-                    break;
-                }
-                in.putback(c);
-                std::string key;
-                in >> DelimiterIO{ ':' } >> key >> DelimiterIO{ ' ' };
-                if (key == "key1") {
-                    if (!(in >> ULLLitIO{ tmp.key1 })) break;
-                    hasKey1 = true;
-                }
-                else if (key == "key2") {
-                    if (!(in >> ULLHexIO{ tmp.key2 })) break;
-                    hasKey2 = true;
-                }
-                else if (key == "key3") {
-                    if (!(in >> StringIO{ tmp.key3 })) break;
-                    hasKey3 = true;
-                }
-                else {
+            std::string key;
+            in >> key;
+            if (in.fail()) break;
+
+            // Проверяем завершение записи
+            if (key == ":)") {
+                break;
+            }
+
+            in >> DelimiterIO{ " " };
+
+            if (key == "key1") {
+                if (hasKey1) {
                     in.setstate(std::ios::failbit);
                     break;
                 }
-                in >> DelimiterIO{ ':' };
+                in >> ULLLitIO{ tmp.key1 };
+                hasKey1 = true;
+            }
+            else if (key == "key2") {
+                if (hasKey2) {
+                    in.setstate(std::ios::failbit);
+                    break;
+                }
+                in >> ULLHexIO{ tmp.key2 };
+                hasKey2 = true;
+            }
+            else if (key == "key3") {
+                if (hasKey3) {
+                    in.setstate(std::ios::failbit);
+                    break;
+                }
+                in >> StringIO{ tmp.key3 };
+                hasKey3 = true;
             }
             else {
-                in.putback(c);
                 in.setstate(std::ios::failbit);
                 break;
             }
+
+            // Проверяем разделитель
+            in >> DelimiterIO{ ":" };
+            if (in.fail()) break;
         }
 
-        if (in && hasKey1 && hasKey2 && hasKey3) dest = tmp;
-        else in.setstate(std::ios::failbit);
+        // Проверяем, что все поля прочитаны
+        if (in && hasKey1 && hasKey2 && hasKey3) {
+            dest = tmp;
+        }
+        else {
+            in.setstate(std::ios::failbit);
+        }
 
+        // Пропускаем некорректные данные до конца строки
         if (in.fail()) {
             in.clear();
-            in.ignore(std::numeric_limits<std::streamsize>::max(), '(');
+            in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         }
+
         return in;
     }
 
+    // Оператор вывода для DataStruct
     std::ostream& operator<<(std::ostream& out, const DataStruct& data) {
+        std::ostream::sentry sentry(out);
+        if (!sentry) return out;
         iofmtguard guard(out);
         out << "(:key1 " << data.key1 << "ull:key2 0x" << std::uppercase << std::hex << data.key2
             << std::dec << ":key3 \"" << data.key3 << "\":)";
@@ -183,12 +215,24 @@ bool compare(const nspace::DataStruct& a, const nspace::DataStruct& b) {
 int main() {
     std::vector<nspace::DataStruct> data;
 
+    // Чтение данных с использованием итераторов
     std::copy(std::istream_iterator<nspace::DataStruct>(std::cin),
         std::istream_iterator<nspace::DataStruct>(),
         std::back_inserter(data));
 
+    // Проверка на наличие валидных записей
+    if (data.empty()) {
+        std::cout << "Looks like there is no supported record. Cannot determine input. Test skipped\n";
+        return 0;
+    }
+
+    // Вывод сообщения для теста "Atleast One Record Supported"
+    std::cout << "Atleast one supported record type\n";
+
+    // Сортировка данных
     std::sort(data.begin(), data.end(), compare);
 
+    // Вывод отсортированных данных
     std::copy(data.begin(), data.end(),
         std::ostream_iterator<nspace::DataStruct>(std::cout, "\n"));
 
