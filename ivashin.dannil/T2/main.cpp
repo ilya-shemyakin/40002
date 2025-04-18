@@ -109,7 +109,7 @@ std::istream& operator>>(std::istream& input, DataStruct& data) {
                 input.setstate(std::ios::failbit);
                 return input;
             }
-            keys[2] = true;     
+            keys[2] = true;
         }
         else {
             input.setstate(std::ios::failbit);
