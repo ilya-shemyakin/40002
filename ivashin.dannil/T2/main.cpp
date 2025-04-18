@@ -112,12 +112,20 @@ namespace nspace {
         std::istream::sentry sentry(in);
         if (!sentry) return in;
         char quote;
-        in >> quote;
+        in >> std::noskipws >> quote; // Не пропускать пробелы перед кавычкой
         if (quote != '"') {
             in.setstate(std::ios::failbit);
             return in;
         }
-        std::getline(in, dest.ref, '"');
+        dest.ref.clear();
+        char c;
+        while (in >> std::noskipws >> c && c != '"') {
+            dest.ref += c;
+        }
+        if (c != '"') {
+            in.setstate(std::ios::failbit);
+        }
+        in >> std::skipws; // Восстанавливаем стандартное поведение
         return in;
     }
 
