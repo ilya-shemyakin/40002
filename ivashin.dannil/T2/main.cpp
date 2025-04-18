@@ -11,8 +11,8 @@
 namespace nspace {
 
     struct DataStruct {
-        unsigned long long key1; // ULL LIT
-        unsigned long long key2; // ULL HEX
+        unsigned long long key1 = 0; // ULL LIT
+        unsigned long long key2 = 0; // ULL HEX
         std::string key3;
     };
 
@@ -126,19 +126,33 @@ namespace nspace {
         std::istream::sentry sentry(in);
         if (!sentry) return in;
 
-        DataStruct tmp;
+        DataStruct tmp; // Поля уже инициализированы: key1=0, key2=0, key3=""
         bool hasKey1 = false, hasKey2 = false, hasKey3 = false;
 
         in >> DelimiterIO{ "(:" }; // Начальный разделитель
+        if (in.fail()) {
+            in.clear();
+            in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            return in;
+        }
 
-        while (true) {
+        while (in) {
             std::string key;
             in >> key;
             if (in.fail()) break;
 
-            if (key == ":)") break; // Завершение записи
+            if (key == ":)") {
+                if (hasKey1 && hasKey2 && hasKey3) {
+                    dest = tmp; // Присваиваем только при успешном парсинге
+                }
+                else {
+                    in.setstate(std::ios::failbit);
+                }
+                break;
+            }
 
             in >> DelimiterIO{ " " };
+            if (in.fail()) break;
 
             if (key == "key1") {
                 if (hasKey1) {
@@ -146,7 +160,7 @@ namespace nspace {
                     break;
                 }
                 in >> ULLLitIO{ tmp.key1 };
-                hasKey1 = true;
+                hasKey1 = in.good();
             }
             else if (key == "key2") {
                 if (hasKey2) {
@@ -154,7 +168,7 @@ namespace nspace {
                     break;
                 }
                 in >> ULLHexIO{ tmp.key2 };
-                hasKey2 = true;
+                hasKey2 = in.good();
             }
             else if (key == "key3") {
                 if (hasKey3) {
@@ -162,22 +176,15 @@ namespace nspace {
                     break;
                 }
                 in >> StringIO{ tmp.key3 };
-                hasKey3 = true;
+                hasKey3 = in.good();
             }
             else {
                 in.setstate(std::ios::failbit);
                 break;
             }
 
-            in >> DelimiterIO{ ":" }; // Разделитель между полями
+            in >> DelimiterIO{ ":" };
             if (in.fail()) break;
-        }
-
-        if (in && hasKey1 && hasKey2 && hasKey3) {
-            dest = tmp;
-        }
-        else {
-            in.setstate(std::ios::failbit);
         }
 
         if (in.fail()) { // Пропуск некорректных данных
