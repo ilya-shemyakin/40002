@@ -1,243 +1,185 @@
-﻿#include <iostream>
-#include <vector>
-#include <algorithm>
+﻿#include <algorithm>
+#include <iomanip>
+#include <iostream>
 #include <iterator>
 #include <sstream>
 #include <string>
-#include <cctype>
-#include <iomanip>
+#include <vector>
 #include <limits>
 
-namespace nspace {
+struct DataStruct {
+    unsigned long long key1_;
+    unsigned long long key2_;
+    std::string key3_;
+};
 
-    struct DataStruct {
-        unsigned long long key1 = 0; // ULL LIT
-        unsigned long long key2 = 0; // ULL HEX
-        std::string key3;
-    };
+class IofmtGuard {
+public:
+    IofmtGuard(std::basic_ios<char>& stream) : stream_(stream), flags_(stream.flags()) {}
+    ~IofmtGuard() { stream_.flags(flags_); }
 
-    struct DelimiterIO { std::string exp; };
-    struct ULLLitIO { unsigned long long& value; };
-    struct ULLHexIO { unsigned long long& value; };
-    struct StringIO { std::string& ref; };
+private:
+    std::basic_ios<char>& stream_;
+    std::ios_base::fmtflags flags_;
+};
 
-    class iofmtguard {
-    public:
-        iofmtguard(std::basic_ios<char>& s);
-        ~iofmtguard();
-    private:
-        std::basic_ios<char>& s_;
-        std::streamsize width_;
-        char fill_;
-        std::streamsize precision_;
-        std::basic_ios<char>::fmtflags fmt_;
-    };
-
-    iofmtguard::iofmtguard(std::basic_ios<char>& s) :
-        s_(s), width_(s.width()), fill_(s.fill()),
-        precision_(s.precision()), fmt_(s.flags()) {
+std::istream& operator>>(std::istream& input, DataStruct& data) {
+    std::istream::sentry sentry(input);
+    if (!sentry) {
+        return input;
     }
 
-    iofmtguard::~iofmtguard() {
-        s_.width(width_);
-        s_.fill(fill_);
-        s_.precision(precision_);
-        s_.flags(fmt_);
+    DataStruct temp;
+    char c;
+    std::string token;
+
+    if (!(input >> c) || c != '(') {
+        input.setstate(std::ios::failbit);
+        return input;
     }
 
-    // Чтение разделителей (строковых)
-    std::istream& operator>>(std::istream& in, DelimiterIO&& dest) {
-        std::istream::sentry sentry(in);
-        if (!sentry) return in;
-        std::string input;
-        for (char c : dest.exp) {
-            char got;
-            in.get(got);
-            input += got;
-            if (!in || got != c) {
-                in.setstate(std::ios::failbit);
-                return in;
-            }
-        }
-        return in;
-    }
+    bool valid = true;
+    bool keysPresent[3] = { false, false, false };
 
-    // Чтение ULL LIT
-    std::istream& operator>>(std::istream& in, ULLLitIO&& dest) {
-        std::istream::sentry sentry(in);
-        if (!sentry) return in;
-        std::string str;
-        in >> str;
-        if (str.size() < 3) {
-            in.setstate(std::ios::failbit);
-            return in;
-        }
-        std::string suffix = str.substr(str.size() - 3);
-        for (char& ch : suffix) ch = std::tolower(ch);
-        if (suffix != "ull") {
-            in.setstate(std::ios::failbit);
-            return in;
-        }
-        try {
-            dest.value = std::stoull(str.substr(0, str.size() - 3));
-        }
-        catch (...) {
-            in.setstate(std::ios::failbit);
-        }
-        return in;
-    }
-
-    // Чтение ULL HEX
-    std::istream& operator>>(std::istream& in, ULLHexIO&& dest) {
-        std::istream::sentry sentry(in);
-        if (!sentry) return in;
-        std::string str;
-        in >> str;
-        if (str.size() < 2 || (str.substr(0, 2) != "0x" &&
-            str.substr(0, 2) != "0X")) {
-            in.setstate(std::ios::failbit);
-            return in;
-        }
-        try {
-            dest.value = std::stoull(str.substr(2), nullptr, 16);
-        }
-        catch (...) {
-            in.setstate(std::ios::failbit);
-        }
-        return in;
-    }
-
-    std::istream& operator>>(std::istream& in, StringIO&& dest) {
-        std::istream::sentry sentry(in);
-        if (!sentry) return in;
-        char quote;
-        in >> std::noskipws >> quote; 
-        if (quote != '"') {
-            in.setstate(std::ios::failbit);
-            return in;
-        }
-        dest.ref.clear();
-        char c;
-        while (in >> std::noskipws >> c && c != '"') {
-            dest.ref += c;
-        }
-        if (c != '"') {
-            in.setstate(std::ios::failbit);
-        }
-        in >> std::skipws; 
-        return in;
-    }
-
-    std::istream& operator>>(std::istream& in, DataStruct& dest) {
-        std::istream::sentry sentry(in);
-        if (!sentry) return in;
-
-        DataStruct tmp; 
-        bool hasKey1 = false, hasKey2 = false, hasKey3 = false;
-
-        in >> DelimiterIO{ "(:" }; 
-        if (in.fail()) {
-            in.clear();
-            in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            return in;
+    while (valid && input >> c && c == ':') {
+        if (!(input >> token)) {
+            valid = false;
+            break;
         }
 
-        while (in) {
-            std::string key;
-            in >> key;
-            if (in.fail()) break;
-
-            if (key == ":)") {
-                if (hasKey1 && hasKey2 && hasKey3) {
-                    dest = tmp; 
-                }
-                else {
-                    in.setstate(std::ios::failbit);
-                }
+        if (token == "key1" && !keysPresent[0]) {
+            std::string valueStr;
+            if (!(input >> valueStr)) {
+                valid = false;
                 break;
             }
-
-            in >> DelimiterIO{ " " };
-            if (in.fail()) break;
-
-            if (key == "key1") {
-                if (hasKey1) {
-                    in.setstate(std::ios::failbit);
-                    break;
-                }
-                in >> ULLLitIO{ tmp.key1 };
-                hasKey1 = in.good();
+            if (valueStr.size() < 4 ||
+                (valueStr.substr(valueStr.size() - 3) != "ull" && valueStr.substr(valueStr.size() - 3) != "ULL")) {
+                valid = false;
+                break;
             }
-            else if (key == "key2") {
-                if (hasKey2) {
-                    in.setstate(std::ios::failbit);
-                    break;
-                }
-                in >> ULLHexIO{ tmp.key2 };
-                hasKey2 = in.good();
+            std::istringstream iss(valueStr.substr(0, valueStr.size() - 3));
+            unsigned long long value;
+            if (!(iss >> value) || iss.rdbuf()->in_avail() > 0) {
+                valid = false;
+                break;
             }
-            else if (key == "key3") {
-                if (hasKey3) {
-                    in.setstate(std::ios::failbit);
-                    break;
-                }
-                in >> StringIO{ tmp.key3 };
-                hasKey3 = in.good();
+            temp.key1_ = value;
+            keysPresent[0] = true;
+        }
+        else if (token == "key2" && !keysPresent[1]) {
+            std::string hexString;
+            if (!(input >> hexString)) {
+                valid = false;
+                break;
+            }
+            if (hexString.size() < 3 || hexString.substr(0, 2) != "0x") {
+                valid = false;
+                break;
+            }
+            std::istringstream iss(hexString.substr(2));
+            unsigned long long value;
+            if (!(iss >> std::hex >> value) || iss.rdbuf()->in_avail() > 0) {
+                valid = false;
+                break;
+            }
+            temp.key2_ = value;
+            keysPresent[1] = true;
+        }
+        else if (token == "key3" && !keysPresent[2]) {
+            input >> std::ws;
+            if (input.get() != '"') {
+                valid = false;
+                break;
+            }
+            std::getline(input, temp.key3_, '"');
+            if (input.fail()) {
+                valid = false;
+                break;
+            }
+            keysPresent[2] = true;
+        }
+        else {
+            valid = false;
+            break;
+        }
+
+        if (keysPresent[0] && keysPresent[1] && keysPresent[2]) {
+            break;
+        }
+    }
+
+    if (valid && keysPresent[0] && keysPresent[1] && keysPresent[2]) {
+        // Read the trailing colon and closing parenthesis
+        if (input >> c && c == ':') {
+            if (input >> c && c == ')') {
+                data = temp;
             }
             else {
-                in.setstate(std::ios::failbit);
-                break;
+                valid = false;
             }
-
-            in >> DelimiterIO{ ":" };
-            if (in.fail()) break;
         }
-
-        if (in.fail()) { 
-            in.clear();
-            in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        else {
+            valid = false;
         }
-
-        return in;
+    }
+    else {
+        valid = false;
     }
 
-    std::ostream& operator<<(std::ostream& out, const DataStruct& data) {
-        std::ostream::sentry sentry(out);
-        if (!sentry) return out;
-        iofmtguard guard(out);
-        out << "(:key1 " << data.key1 << "ull:key2 0x";
-        out << std::uppercase << std::hex << data.key2;
-        out << std::dec << ":key3 \"" << data.key3 << "\":)";
-        return out;
+    if (!valid) {
+        input.setstate(std::ios::failbit);
     }
 
-} 
+    return input;
+}
 
-bool compare(const nspace::DataStruct& a, const nspace::DataStruct& b) {
-    if (a.key1 != b.key1) return a.key1 < b.key1;
-    if (a.key2 != b.key2) return a.key2 < b.key2;
-    return a.key3.size() < b.key3.size();
+std::ostream& operator<<(std::ostream& output, const DataStruct& data) {
+    std::ostream::sentry sentry(output);
+    if (!sentry) {
+        return output;
+    }
+
+    IofmtGuard guard(output);
+    output << "(:key1 " << data.key1_ << "ull:key2 0x" << std::hex << std::uppercase
+        << data.key2_ << std::dec << ":key3 \"" << data.key3_ << "\":)";
+    return output;
+}
+
+bool compareData(const DataStruct& first, const DataStruct& second) {
+    if (first.key1_ != second.key1_) {
+        return first.key1_ < second.key1_;
+    }
+    if (first.key2_ != second.key2_) {
+        return first.key2_ < second.key2_;
+    }
+    return first.key3_.length() < second.key3_.length();
 }
 
 int main() {
-    std::vector<nspace::DataStruct> data;
+    std::vector<DataStruct> data;
+    bool hasValidRecord = false;
 
-    std::copy(std::istream_iterator<nspace::DataStruct>(std::cin),
-        std::istream_iterator<nspace::DataStruct>(),
-        std::back_inserter(data));
-
-    if (data.empty()) {
-        std::cout << "Looks like there is no supported record. ";
-        std::cout << "Cannot determine input. Test skipped\n";
-        return 0;
+    while (!std::cin.eof()) {
+        DataStruct temp;
+        if (std::cin >> temp) {
+            data.push_back(temp);
+            hasValidRecord = true;
+        }
+        else {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
     }
 
-    std::cout << "Atleast one supported record type\n";
-
-    std::sort(data.begin(), data.end(), compare);
-
-    std::copy(data.begin(), data.end(),
-        std::ostream_iterator<nspace::DataStruct>(std::cout, "\n"));
+    if (hasValidRecord) {
+        std::cout << "Atleast one supported record type\n";
+        std::sort(data.begin(), data.end(), compareData);
+        std::copy(data.begin(), data.end(), std::ostream_iterator<DataStruct>(std::cout, "\n"));
+    }
+    else {
+        std::cout << "Looks like there is no supported record. Cannot determine input. Test skipped\n";
+    }
 
     return 0;
 }
