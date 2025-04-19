@@ -107,12 +107,11 @@ namespace nspace {
         return in;
     }
 
-    // Чтение строки
     std::istream& operator>>(std::istream& in, StringIO&& dest) {
         std::istream::sentry sentry(in);
         if (!sentry) return in;
         char quote;
-        in >> std::noskipws >> quote; // Не пропускать пробелы перед кавычкой
+        in >> std::noskipws >> quote; 
         if (quote != '"') {
             in.setstate(std::ios::failbit);
             return in;
@@ -125,19 +124,18 @@ namespace nspace {
         if (c != '"') {
             in.setstate(std::ios::failbit);
         }
-        in >> std::skipws; // Восстанавливаем стандартное поведение
+        in >> std::skipws; 
         return in;
     }
 
-    // Чтение DataStruct
     std::istream& operator>>(std::istream& in, DataStruct& dest) {
         std::istream::sentry sentry(in);
         if (!sentry) return in;
 
-        DataStruct tmp; // Поля уже инициализированы: key1=0, key2=0, key3=""
+        DataStruct tmp; 
         bool hasKey1 = false, hasKey2 = false, hasKey3 = false;
 
-        in >> DelimiterIO{ "(:" }; // Начальный разделитель
+        in >> DelimiterIO{ "(:" }; 
         if (in.fail()) {
             in.clear();
             in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -151,7 +149,7 @@ namespace nspace {
 
             if (key == ":)") {
                 if (hasKey1 && hasKey2 && hasKey3) {
-                    dest = tmp; // Присваиваем только при успешном парсинге
+                    dest = tmp; 
                 }
                 else {
                     in.setstate(std::ios::failbit);
@@ -195,7 +193,7 @@ namespace nspace {
             if (in.fail()) break;
         }
 
-        if (in.fail()) { // Пропуск некорректных данных
+        if (in.fail()) { 
             in.clear();
             in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         }
@@ -203,7 +201,6 @@ namespace nspace {
         return in;
     }
 
-    // Вывод DataStruct
     std::ostream& operator<<(std::ostream& out, const DataStruct& data) {
         std::ostream::sentry sentry(out);
         if (!sentry) return out;
@@ -214,7 +211,7 @@ namespace nspace {
         return out;
     }
 
-} // namespace nspace
+} 
 
 bool compare(const nspace::DataStruct& a, const nspace::DataStruct& b) {
     if (a.key1 != b.key1) return a.key1 < b.key1;
@@ -225,25 +222,20 @@ bool compare(const nspace::DataStruct& a, const nspace::DataStruct& b) {
 int main() {
     std::vector<nspace::DataStruct> data;
 
-    // Чтение данных
     std::copy(std::istream_iterator<nspace::DataStruct>(std::cin),
         std::istream_iterator<nspace::DataStruct>(),
         std::back_inserter(data));
 
-    // Проверка на отсутствие валидных записей
     if (data.empty()) {
         std::cout << "Looks like there is no supported record. ";
         std::cout << "Cannot determine input. Test skipped\n";
         return 0;
     }
 
-    // Сообщение о наличии записей
     std::cout << "Atleast one supported record type\n";
 
-    // Сортировка
     std::sort(data.begin(), data.end(), compare);
 
-    // Вывод результатов
     std::copy(data.begin(), data.end(),
         std::ostream_iterator<nspace::DataStruct>(std::cout, "\n"));
 
