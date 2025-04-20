@@ -49,15 +49,22 @@ std::istream& operator>>(std::istream& input, DataStruct& data) {
 
         if (token == "key1" && !keysPresent[0]) {
             std::string valueStr;
-            if (!(input >> valueStr)) {
+            char nextChar;
+            while (input.get(nextChar)) {
+                if (nextChar == ':' || nextChar == ')') {
+                    input.putback(nextChar);
+                    break;
+                }
+                valueStr += nextChar;
+            }
+
+            if (valueStr.size() < 3 ||
+                (valueStr.substr(valueStr.size() - 3) != "ull" &&
+                    valueStr.substr(valueStr.size() - 3) != "ULL")) {
                 valid = false;
                 break;
             }
-            if (valueStr.size() < 4 ||
-                (valueStr.substr(valueStr.size() - 3) != "ull" && valueStr.substr(valueStr.size() - 3) != "ULL")) {
-                valid = false;
-                break;
-            }
+
             std::istringstream iss(valueStr.substr(0, valueStr.size() - 3));
             unsigned long long value;
             if (!(iss >> value) || iss.rdbuf()->in_avail() > 0) {
@@ -68,18 +75,17 @@ std::istream& operator>>(std::istream& input, DataStruct& data) {
             keysPresent[0] = true;
         }
         else if (token == "key2" && !keysPresent[1]) {
-            std::string hexString;
-            if (!(input >> hexString)) {
+            if (!(input >> c) || c != '0') {
                 valid = false;
                 break;
             }
-            if (hexString.size() < 3 || hexString.substr(0, 2) != "0x") {
+            if (!(input >> c) || (c != 'x' && c != 'X')) {
                 valid = false;
                 break;
             }
-            std::istringstream iss(hexString.substr(2));
+
             unsigned long long value;
-            if (!(iss >> std::hex >> value) || iss.rdbuf()->in_avail() > 0) {
+            if (!(input >> std::hex >> value)) {
                 valid = false;
                 break;
             }
@@ -100,31 +106,15 @@ std::istream& operator>>(std::istream& input, DataStruct& data) {
             keysPresent[2] = true;
         }
         else {
-            valid = false;
-            break;
-        }
-
-        if (keysPresent[0] && keysPresent[1] && keysPresent[2]) {
+            if (token != ")") {
+                valid = false;
+            }
             break;
         }
     }
 
     if (valid && keysPresent[0] && keysPresent[1] && keysPresent[2]) {
-        // Read the trailing colon and closing parenthesis
-        if (input >> c && c == ':') {
-            if (input >> c && c == ')') {
-                data = temp;
-            }
-            else {
-                valid = false;
-            }
-        }
-        else {
-            valid = false;
-        }
-    }
-    else {
-        valid = false;
+        data = temp;
     }
 
     if (!valid) {
@@ -146,6 +136,8 @@ std::ostream& operator<<(std::ostream& output, const DataStruct& data) {
     return output;
 }
 
+
+
 bool compareData(const DataStruct& first, const DataStruct& second) {
     if (first.key1_ != second.key1_) {
         return first.key1_ < second.key1_;
@@ -157,29 +149,29 @@ bool compareData(const DataStruct& first, const DataStruct& second) {
 }
 
 int main() {
-    std::vector<DataStruct> data;
-    bool hasValidRecord = false;
 
-    while (!std::cin.eof()) {
-        DataStruct temp;
-        if (std::cin >> temp) {
-            data.push_back(temp);
-            hasValidRecord = true;
-        }
-        else {
-            std::cin.clear();
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        }
-    }
+    /*DataStruct d;
+    std::cin >> d;
+    std::cout << d;*/
 
-    if (hasValidRecord) {
-        std::cout << "Atleast one supported record type\n";
-        std::sort(data.begin(), data.end(), compareData);
-        std::copy(data.begin(), data.end(), std::ostream_iterator<DataStruct>(std::cout, "\n"));
-    }
-    else {
-        std::cout << "Looks like there is no supported record. Cannot determine input. Test skipped\n";
-    }
-
+     std::vector<DataStruct> ds;
+     while (!std::cin.eof()) {
+         std::copy(
+             std::istream_iterator<DataStruct>(std::cin),
+             std::istream_iterator<DataStruct>(),
+             std::back_inserter(ds)
+         );
+         if (!std::cin.fail()) {
+             continue;
+         }
+         std::cin.clear();
+         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+     }
+     std::sort(ds.begin(), ds.end(), compareData);
+     std::copy(
+         ds.begin(),
+         ds.end(),
+         std::ostream_iterator<DataStruct>(std::cout, "\n")
+     );
     return 0;
 }
