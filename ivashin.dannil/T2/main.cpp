@@ -151,6 +151,7 @@ bool compareData(const DataStruct& first, const DataStruct& second) {
 int main() {
 
     //----Test----
+
     /*DataStruct d;
     std::cin >> d;
     std::cout << d;*/
