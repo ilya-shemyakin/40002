@@ -1,47 +1,418 @@
-#include "DataStruct.h"
-#include <vector>
-#include <algorithm>
-#include <iterator>
 #include <iostream>
+#include <fstream>
+#include <sstream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <numeric>
+#include <cmath>
+#include <iomanip>
+#include <functional>
 
-int main()
-{
-    using nspace::DataStruct;
+static const std::size_t RECT_VERTICES = 4;
 
-    std::vector<DataStruct> data;
-    std::copy(
-        std::istream_iterator<DataStruct>(std::cin),
-        std::istream_iterator<DataStruct>(),
-        std::back_inserter(data)
-    );
+struct Point {
+    int x;
+    int y;
+    Point(int x_val = 0, int y_val = 0) : x(x_val), y(y_val) {}
+};
 
-    std::sort(
-        data.begin(),
-        data.end(),
-        [](const DataStruct& a, const DataStruct& b)
-        {
-            if (a.key1 != b.key1)
-            {
-                return a.key1 < b.key1;
-            }
-            if (a.key2 != b.key2)
-            {
-                return a.key2 < b.key2;
-            }
-            return a.key3.size() < b.key3.size();
+struct Polygon {
+    std::vector<Point> points;
+};
+
+// Вычитание двух точек (векторная разность)
+Point operator-(const Point& a, const Point& b) {
+    return Point(a.x - b.x, a.y - b.y);
+}
+
+// Скалярное произведение векторов
+int dot(const Point& a, const Point& b) {
+    return a.x * b.x + a.y * b.y;
+}
+
+// Псевдоскалярное произведение (cross product) 
+int cross(const Point& a, const Point& b) {
+    return a.x * b.y - a.y * b.x;
+}
+
+// Вычисление площади многоугольника по формуле Гаусса
+double compute_area(const Polygon& poly) {
+    const auto& pts = poly.points;
+    int n = pts.size();
+    if (n < 3) {
+        return 0.0;
+    }
+    // Суммируем xi*y(i+1) - yi*x(i+1) для всех ребер
+    long long area2 = std::inner_product(
+        pts.begin(), pts.end() - 1,
+        pts.begin() + 1, 0LL,
+        std::plus<long long>(),
+        [](const Point& a, const Point& b) {
+            return (long long)a.x * b.y - (long long)a.y * b.x;
+        });
+    // Добавляем последнее ребро (последняя и первая точки)
+    const Point& last = pts.back();
+    const Point& first = pts.front();
+    area2 += (long long)last.x * first.y - (long long)last.y * first.x;
+    return std::abs(area2) / 2.0;
+}
+
+// Проверка, является ли многоугольник прямоугольником (4 точки, все углы 90 градусов)
+bool is_rectangle(const Polygon& poly) {
+    if (poly.points.size() != RECT_VERTICES) {
+        return false;
+    }
+    const auto& p = poly.points;
+    Point v0 = p[1] - p[0];
+    Point v1 = p[2] - p[1];
+    Point v2 = p[3] - p[2];
+    Point v3 = p[0] - p[3];
+    // Углы прямые: скалярное произведение соседних векторов == 0
+    if (dot(v0, v1) != 0 || dot(v1, v2) != 0 ||
+        dot(v2, v3) != 0 || dot(v3, v0) != 0) {
+        return false;
+    }
+    // Противоположные стороны равны по длине
+    long long len0 = (long long)v0.x * v0.x + (long long)v0.y * v0.y;
+    long long len1 = (long long)v1.x * v1.x + (long long)v1.y * v1.y;
+    long long len2 = (long long)v2.x * v2.x + (long long)v2.y * v2.y;
+    long long len3 = (long long)v3.x * v3.x + (long long)v3.y * v3.y;
+    if (len0 != len2 || len1 != len3) {
+        return false;
+    }
+    return true;
+}
+
+// Ориентация трех точек (p, q, r): положительное - влево, отрицательное - вправо, ноль - коллинеарно
+long long orient(const Point& p, const Point& q, const Point& r) {
+    return (long long)(q.x - p.x) * (r.y - p.y) -
+        (long long)(q.y - p.y) * (r.x - p.x);
+}
+
+// Проверка, лежит ли точка q на отрезке pr
+bool on_segment(const Point& p, const Point& q, const Point& r) {
+    return q.x >= std::min(p.x, r.x) && q.x <= std::max(p.x, r.x) &&
+        q.y >= std::min(p.y, r.y) && q.y <= std::max(p.y, r.y);
+}
+
+// Проверка пересечения отрезков p1q1 и p2q2
+bool seg_intersect(const Point& p1, const Point& q1,
+    const Point& p2, const Point& q2) {
+    long long o1 = orient(p1, q1, p2);
+    long long o2 = orient(p1, q1, q2);
+    long long o3 = orient(p2, q2, p1);
+    long long o4 = orient(p2, q2, q1);
+    // Общий случай: отрезки пересекаются, если ориентации различны
+    if (o1 * o2 < 0 && o3 * o4 < 0) {
+        return true;
+    }
+    // Частные случаи коллинеарности
+    if (o1 == 0 && on_segment(p1, p2, q1)) return true;
+    if (o2 == 0 && on_segment(p1, q2, q1)) return true;
+    if (o3 == 0 && on_segment(p2, p1, q2)) return true;
+    if (o4 == 0 && on_segment(p2, q1, q2)) return true;
+    return false;
+}
+
+// Проверка, находится ли точка внутри многоугольника (алгоритм луча вправо)
+bool point_in_polygon(const Point& pt, const Polygon& poly) {
+    bool inside = false;
+    const auto& p = poly.points;
+    int n = p.size();
+    if (n < 3) {
+        return false;
+    }
+    for (int i = 0, j = n - 1; i < n; j = i++) {
+        bool intersect = ((p[i].y > pt.y) != (p[j].y > pt.y)) &&
+            (pt.x < (long double)(p[j].x - p[i].x) * (pt.y - p[i].y) /
+                (p[j].y - p[i].y) + p[i].x);
+        if (intersect) {
+            inside = !inside;
         }
-    );
+    }
+    return inside;
+}
 
-    std::copy(
-        data.begin(),
-        data.end(),
-        std::ostream_iterator<DataStruct>(std::cout, "\n")
-    );
+// Проверка пересечения двух многоугольников
+bool polygons_intersect(const Polygon& a, const Polygon& b) {
+    int na = a.points.size();
+    int nb = b.points.size();
+    // Проверяем пересечение любых пар ребер
+    for (int i = 0; i < na; ++i) {
+        for (int j = 0; j < nb; ++j) {
+            if (seg_intersect(a.points[i], a.points[(i + 1) % na],
+                b.points[j], b.points[(j + 1) % nb])) {
+                return true;
+            }
+        }
+    }
+    // Проверка вложенности (если одна фигура внутри другой)
+    if (!a.points.empty() && !b.points.empty()) {
+        if (point_in_polygon(a.points[0], b) || point_in_polygon(b.points[0], a)) {
+            return true;
+        }
+    }
+    return false;
+}
 
-    std::cout << "good: " << std::cin.good() << ", "
-        << "fail: " << std::cin.fail() << ", "
-        << "bad: " << std::cin.bad() << ", "
-        << "eof: " << std::cin.eof() << std::endl;
+// Разбор строки формата: "n (x;y) (x;y) ...", возвращает false при ошибке
+bool parse_polygon(const std::string& str, Polygon& poly) {
+    std::istringstream iss(str);
+    int n;
+    if (!(iss >> n) || n <= 0) {
+        return false;
+    }
+    poly.points.clear();
+    poly.points.reserve(n);
+    char c;
+    for (int i = 0; i < n; ++i) {
+        Point pt;
+        if (!(iss >> c) || c != '(') return false;
+        if (!(iss >> pt.x)) return false;
+        if (!(iss >> c) || c != ';') return false;
+        if (!(iss >> pt.y)) return false;
+        if (!(iss >> c) || c != ')') return false;
+        poly.points.push_back(pt);
+    }
+    iss >> std::ws;
+    if (!iss.eof()) {
+        return false;
+    }
+    return true;
+}
 
+int main(int argc, char* argv[]) {
+    // Проверка аргумента: имя файла
+    if (argc < 2) {
+        return 1;
+    }
+    std::ifstream infile(argv[1]);
+    if (!infile) {
+        return 1;
+    }
+    std::vector<Polygon> polygons;
+    std::string line;
+    // Чтение фигур из файла
+    while (std::getline(infile, line)) {
+        if (line.empty()) {
+            continue;
+        }
+        Polygon poly;
+        if (parse_polygon(line, poly)) {
+            polygons.push_back(std::move(poly));
+        }
+    }
+    // Обработка команд из stdin
+    while (std::getline(std::cin, line)) {
+        if (line.empty()) {
+            continue;
+        }
+        std::istringstream iss(line);
+        std::string cmd;
+        iss >> cmd;
+        bool invalid = false;
+        bool printDouble = false;
+        double dblResult = 0.0;
+        int intResult = 0;
+        if (cmd == "AREA") {
+            std::string arg;
+            iss >> arg;
+            if (arg == "EVEN") {
+                // Сумма площадей фигур с четным числом вершин
+                dblResult = std::accumulate(polygons.begin(), polygons.end(), 0.0,
+                    [](double acc, const Polygon& p) {
+                        return acc + ((p.points.size() % 2 == 0) ? compute_area(p) : 0.0);
+                    });
+                printDouble = true;
+            }
+            else if (arg == "ODD") {
+                // Сумма площадей фигур с нечетным числом вершин
+                dblResult = std::accumulate(polygons.begin(), polygons.end(), 0.0,
+                    [](double acc, const Polygon& p) {
+                        return acc + ((p.points.size() % 2 != 0) ? compute_area(p) : 0.0);
+                    });
+                printDouble = true;
+            }
+            else if (arg == "MEAN") {
+                // Средняя площадь всех фигур
+                if (polygons.empty()) {
+                    dblResult = 0.0;
+                }
+                else {
+                    double total = std::accumulate(polygons.begin(), polygons.end(), 0.0,
+                        [](double acc, const Polygon& p) {
+                            return acc + compute_area(p);
+                        });
+                    dblResult = total / polygons.size();
+                }
+                printDouble = true;
+            }
+            else {
+                // AREA <число>: сумма площадей фигур с этим числом вершин
+                bool is_num = !arg.empty() &&
+                    std::all_of(arg.begin(), arg.end(), ::isdigit);
+                if (is_num) {
+                    int num = std::stoi(arg);
+                    dblResult = std::accumulate(polygons.begin(), polygons.end(), 0.0,
+                        [num](double acc, const Polygon& p) {
+                            return acc + (((int)p.points.size() == num) ? compute_area(p) : 0.0);
+                        });
+                    printDouble = true;
+                }
+                else {
+                    invalid = true;
+                }
+            }
+        }
+        else if (cmd == "MAX") {
+            std::string arg;
+            iss >> arg;
+            if (arg == "AREA") {
+                // Максимальная площадь
+                if (polygons.empty()) {
+                    dblResult = 0.0;
+                }
+                else {
+                    auto it = std::max_element(polygons.begin(), polygons.end(),
+                        [](const Polygon& a, const Polygon& b) {
+                            return compute_area(a) < compute_area(b);
+                        });
+                    dblResult = compute_area(*it);
+                }
+                printDouble = true;
+            }
+            else if (arg == "VERTEXES") {
+                // Максимальное число вершин
+                if (polygons.empty()) {
+                    intResult = 0;
+                }
+                else {
+                    auto it = std::max_element(polygons.begin(), polygons.end(),
+                        [](const Polygon& a, const Polygon& b) {
+                            return a.points.size() < b.points.size();
+                        });
+                    intResult = it->points.size();
+                }
+            }
+            else {
+                invalid = true;
+            }
+        }
+        else if (cmd == "MIN") {
+            std::string arg;
+            iss >> arg;
+            if (arg == "AREA") {
+                // Минимальная площадь
+                if (polygons.empty()) {
+                    dblResult = 0.0;
+                }
+                else {
+                    auto it = std::min_element(polygons.begin(), polygons.end(),
+                        [](const Polygon& a, const Polygon& b) {
+                            return compute_area(a) < compute_area(b);
+                        });
+                    dblResult = compute_area(*it);
+                }
+                printDouble = true;
+            }
+            else if (arg == "VERTEXES") {
+                // Минимальное число вершин
+                if (polygons.empty()) {
+                    intResult = 0;
+                }
+                else {
+                    auto it = std::min_element(polygons.begin(), polygons.end(),
+                        [](const Polygon& a, const Polygon& b) {
+                            return a.points.size() < b.points.size();
+                        });
+                    intResult = it->points.size();
+                }
+            }
+            else {
+                invalid = true;
+            }
+        }
+        else if (cmd == "COUNT") {
+            std::string arg;
+            iss >> arg;
+            if (arg == "EVEN") {
+                // Количество фигур с четным числом вершин
+                intResult = std::count_if(polygons.begin(), polygons.end(),
+                    [](const Polygon& p) { return p.points.size() % 2 == 0; });
+            }
+            else if (arg == "ODD") {
+                // Количество фигур с нечетным числом вершин
+                intResult = std::count_if(polygons.begin(), polygons.end(),
+                    [](const Polygon& p) { return p.points.size() % 2 != 0; });
+            }
+            else {
+                // COUNT <число>: количество фигур с таким числом вершин
+                bool is_num = !arg.empty() &&
+                    std::all_of(arg.begin(), arg.end(), ::isdigit);
+                if (is_num) {
+                    int num = std::stoi(arg);
+                    intResult = std::count_if(polygons.begin(), polygons.end(),
+                        [num](const Polygon& p) { return (int)p.points.size() == num; });
+                }
+                else {
+                    invalid = true;
+                }
+            }
+        }
+        else if (cmd == "RECTS") {
+            // Количество прямоугольников
+            std::string extra;
+            if (iss >> extra) {
+                invalid = true;
+            }
+            else {
+                intResult = std::count_if(polygons.begin(), polygons.end(),
+                    [](const Polygon& p) { return is_rectangle(p); });
+            }
+        }
+        else if (cmd == "INTERSECTIONS") {
+            // Остальная часть строки - многоугольник
+            std::string rest;
+            std::getline(iss, rest);
+            if (rest.empty()) {
+                invalid = true;
+            }
+            else {
+                size_t pos = rest.find_first_not_of(' ');
+                if (pos != std::string::npos) {
+                    rest = rest.substr(pos);
+                }
+                Polygon query;
+                if (!parse_polygon(rest, query)) {
+                    invalid = true;
+                }
+                else {
+                    intResult = std::count_if(polygons.begin(), polygons.end(),
+                        [&query](const Polygon& p) { return polygons_intersect(p, query); });
+                }
+            }
+        }
+        else {
+            invalid = true;
+        }
+        // Проверка на лишние токены (для команд, не обрабатывающих остаток)
+        if (!invalid && cmd != "RECTS" && cmd != "INTERSECTIONS") {
+            std::string extra;
+            if (iss >> extra) {
+                invalid = true;
+            }
+        }
+        // Вывод результата
+        if (invalid) {
+            std::cout << "<INVALID COMMAND>\n";
+        }
+        else if (printDouble) {
+            std::cout << std::fixed << std::setprecision(1) << dblResult << "\n";
+        }
+        else {
+            std::cout << intResult << "\n";
+        }
+    }
     return 0;
 }
