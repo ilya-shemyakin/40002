@@ -1,4 +1,4 @@
-п»ї#include <iostream>
+#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <vector>
@@ -23,22 +23,22 @@ struct Polygon {
     std::vector<Point> points;
 };
 
-// Р’С‹С‡РёС‚Р°РЅРёРµ РґРІСѓС… С‚РѕС‡РµРє (РІРµРєС‚РѕСЂРЅР°СЏ СЂР°Р·РЅРѕСЃС‚СЊ)
+// Вычитание двух точек (векторная разность)
 Point operator-(const Point& a, const Point& b) {
     return Point(a.x - b.x, a.y - b.y);
 }
 
-// РЎРєР°Р»СЏСЂРЅРѕРµ РїСЂРѕРёР·РІРµРґРµРЅРёРµ РІРµРєС‚РѕСЂРѕРІ
+// Скалярное произведение векторов
 int dot(const Point& a, const Point& b) {
     return a.x * b.x + a.y * b.y;
 }
 
-// РџСЃРµРІРґРѕСЃРєР°Р»СЏСЂРЅРѕРµ РїСЂРѕРёР·РІРµРґРµРЅРёРµ (cross product) 
+// Псевдоскалярное произведение (cross product) 
 int cross(const Point& a, const Point& b) {
     return a.x * b.y - a.y * b.x;
 }
 
-// Р’С‹С‡РёСЃР»РµРЅРёРµ РїР»РѕС‰Р°РґРё РјРЅРѕРіРѕСѓРіРѕР»СЊРЅРёРєР° РїРѕ С„РѕСЂРјСѓР»Рµ Р“Р°СѓСЃСЃР°
+// Вычисление площади многоугольника по формуле Гаусса
 double compute_area(const Polygon& poly) {
     const auto& pts = poly.points;
     int n = pts.size();
@@ -60,7 +60,7 @@ double compute_area(const Polygon& poly) {
     return std::abs(area2) / 2.0;
 }
 
-// РџСЂРѕРІРµСЂРєР°, СЏРІР»СЏРµС‚СЃСЏ Р»Рё РјРЅРѕРіРѕСѓРіРѕР»СЊРЅРёРє РїСЂСЏРјРѕСѓРіРѕР»СЊРЅРёРєРѕРј
+// Проверка, является ли многоугольник прямоугольником
 bool is_rectangle(const Polygon& poly) {
     if (poly.points.size() != RECT_VERTICES) {
         return false;
@@ -71,7 +71,7 @@ bool is_rectangle(const Polygon& poly) {
     Point v2 = p[3] - p[2];
     Point v3 = p[0] - p[3];
 
-    // РЎРєР°Р»СЏСЂРЅРѕРµ РїСЂРѕРёР·РІРµРґРµРЅРёРµ СЃРѕСЃРµРґРЅРёС… РІРµРєС‚РѕСЂРѕРІ == 0
+    // Скалярное произведение соседних векторов == 0
     if (dot(v0, v1) != 0 || dot(v1, v2) != 0 ||
         dot(v2, v3) != 0 || dot(v3, v0) != 0) {
         return false;
@@ -91,13 +91,13 @@ bool is_rectangle(const Polygon& poly) {
     return true;
 }
 
-// РћСЂРёРµРЅС‚Р°С†РёСЏ: >0 вЂ” РІР»РµРІРѕ, <0 вЂ” РІРїСЂР°РІРѕ, 0 вЂ” РєРѕР»Р»РёРЅРµР°СЂРЅРѕ
+// Ориентация: >0 — влево, <0 — вправо, 0 — коллинеарно
 long long orient(const Point& p, const Point& q, const Point& r) {
     return (long long)(q.x - p.x) * (r.y - p.y)
         - (long long)(q.y - p.y) * (r.x - p.x);
 }
 
-// РўРѕС‡РєР° q РЅР° РѕС‚СЂРµР·РєРµ pr?
+// Точка q на отрезке pr?
 bool on_segment(const Point& p, const Point& q, const Point& r) {
     return q.x >= std::min(p.x, r.x)
         && q.x <= std::max(p.x, r.x)
@@ -105,7 +105,7 @@ bool on_segment(const Point& p, const Point& q, const Point& r) {
         && q.y <= std::max(p.y, r.y);
 }
 
-// РџРµСЂРµСЃРµС‡РµРЅРёРµ РѕС‚СЂРµР·РєРѕРІ p1q1 Рё p2q2
+// Пересечение отрезков p1q1 и p2q2
 bool seg_intersect(const Point& p1, const Point& q1,
     const Point& p2, const Point& q2) {
     long long o1 = orient(p1, q1, p2);
@@ -124,7 +124,7 @@ bool seg_intersect(const Point& p1, const Point& q1,
     return false;
 }
 
-// РўРѕС‡РєР° РІРЅСѓС‚СЂРё РјРЅРѕРіРѕСѓРіРѕР»СЊРЅРёРєР°? (Р°Р»РіРѕСЂРёС‚Рј Р»СѓС‡Р° РІРїСЂР°РІРѕ)
+// Точка внутри многоугольника? (алгоритм луча вправо)
 bool point_in_polygon(const Point& pt, const Polygon& poly) {
     bool inside = false;
     const auto& p = poly.points;
@@ -145,7 +145,7 @@ bool point_in_polygon(const Point& pt, const Polygon& poly) {
     return inside;
 }
 
-// РџСЂРѕРІРµСЂРєР° РїРµСЂРµСЃРµС‡РµРЅРёСЏ РґРІСѓС… РјРЅРѕРіРѕСѓРіРѕР»СЊРЅРёРєРѕРІ
+// Проверка пересечения двух многоугольников
 bool polygons_intersect(const Polygon& a, const Polygon& b) {
     int na = a.points.size();
     int nb = b.points.size();
@@ -169,7 +169,7 @@ bool polygons_intersect(const Polygon& a, const Polygon& b) {
     return false;
 }
 
-// Р Р°Р·Р±РѕСЂ СЃС‚СЂРѕРєРё "n (x;y) ...", false РїСЂРё РѕС€РёР±РєРµ
+// Разбор строки "n (x;y) ...", false при ошибке
 bool parse_polygon(const std::string& str, Polygon& poly) {
     std::istringstream iss(str);
     int n;
