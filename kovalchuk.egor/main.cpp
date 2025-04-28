@@ -31,7 +31,7 @@ int dot(const Point& a, const Point& b) {
     return a.x * b.x + a.y * b.y;
 }
 
-// ѕсевдоскал€рное произведение (cross product) 
+// ѕсевдоскал€рное произведение (cross product)
 int cross(const Point& a, const Point& b) {
     return a.x * b.y - a.y * b.x;
 }
