@@ -10,13 +10,7 @@
 int main() {
     using nspace::DataStructure;
     std::vector<DataStructure> data;
-    std::ifstream fileInput("test_input.txt");
-    if (!fileInput) {
-        std::cerr << "Unable to open file test_input.txt\n";
-        return 1;
-    }
 
-    std::streambuf* oldCinBuf = std::cin.rdbuf(fileInput.rdbuf());
     while (!std::cin.eof()) {
         std::copy(
             std::istream_iterator< DataStructure >(std::cin),
