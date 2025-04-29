@@ -16,6 +16,31 @@ int main() {
         return 1;
     }
 
+    std::streambuf* oldCinBuf = std::cin.rdbuf(fileInput.rdbuf());
+    while (!std::cin.eof()) {
+        std::copy(
+            std::istream_iterator< DataStructure >(std::cin),
+            std::istream_iterator< DataStructure >(),
+            std::back_inserter(data)
+        );
+        if (!std::cin) {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
+    }
+    std::cin.rdbuf(oldCinBuf);
+
+    std::sort(std::begin(data), std::end(data), nspace::comparator);
+    std::copy(
+        std::begin(data),
+        std::end(data),
+        std::ostream_iterator< DataStructure >(std::cout, "\n")
+    );
+
     return 0;
 }
 
+/*
+
+
+*/
