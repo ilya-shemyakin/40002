@@ -1,4 +1,6 @@
-#define DATA_STRUCT_H
+#ifndef DATASTRUCTURE_H
+#define DATASTRUCTURE_H
+
 
 #include <iostream>
 #include <sstream>
@@ -7,31 +9,34 @@
 #include <iterator>
 #include <vector>
 #include <iomanip>
-#include <algorithm>
-#include <cctype>
 #include <complex>
+
+
 
 namespace nspace
 {
-    struct DataStruct
+
+    struct DataStructure
     {
         unsigned long long key1;
         std::complex<double> key2;
         std::string key3;
     };
 
-    std::istream& nextCharAsLowercase(std::istream& is);
-
-    bool comparator(const DataStruct& left, const DataStruct& right);
+    bool comparator(const DataStructure& struct1, const DataStructure& struct2);
 
     struct DelimiterIO
     {
         char exp;
     };
 
-    struct DoubleIO
+    struct OctalUnsignedLongLongIO
     {
-        double& ref;
+        unsigned long long& ref;
+    };
+
+    struct ComplexDoubleIO {
+        std::complex<double>& ref;
     };
 
     struct StringIO
@@ -39,19 +44,11 @@ namespace nspace
         std::string& ref;
     };
 
-    struct LongLongIO
-    {
-        long long& ref;
-    };
+    //
 
-    struct UnsignedLongLongIO
-    {
-        unsigned long long& ref;
-    };
-
+    // scope guard для возврата состояния потока в первоначальное состояние
     class iofmtguard
     {
-
     public:
         iofmtguard(std::basic_ios< char >& s);
         ~iofmtguard();
@@ -64,16 +61,13 @@ namespace nspace
     };
 
     std::istream& operator>>(std::istream& in, DelimiterIO&& dest);
-    std::istream& operator>>(std::istream& in, DoubleIO&& dest);
+    std::istream& operator>>(std::istream& in, OctalUnsignedLongLongIO&& dest);
+    std::istream& operator>>(std::istream& in, ComplexDoubleIO&& dest);
     std::istream& operator>>(std::istream& in, StringIO&& dest);
-    std::istream& operator>>(std::istream& in, LongLongIO&& dest);
-    std::istream& operator>>(std::istream& in, UnsignedLongLongIO&& dest);
-    std::istream& operator>>(std::istream& in, DataStruct& dest);
-    std::ostream& operator<<(std::ostream& out, const DataStruct& dest);
 
-
+    std::istream& operator>>(std::istream& in, DataStructure& dest);
+    std::ostream& operator<<(std::ostream& out, const DataStructure& dest);
 }
-
 
 
 #endif
