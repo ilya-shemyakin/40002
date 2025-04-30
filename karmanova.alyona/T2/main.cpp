@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cctype>
 #include <fstream>
+#include <limits>
 
 namespace nspace
 {
