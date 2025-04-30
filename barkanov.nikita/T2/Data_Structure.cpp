@@ -111,7 +111,9 @@ namespace nspace {
         }
         iofmtguard fmtguard(out);
         out << "(:key1 0" << std::oct << src.key1;
+        out << std::fixed << std::setprecision(1);
         out << ":key2 " << "#c(" << src.key2.real() << " " << src.key2.imag() << ")";
+        out << std::defaultfloat;
         out << ":key3 \"" << src.key3 << "\":)";
         return out;
     }
