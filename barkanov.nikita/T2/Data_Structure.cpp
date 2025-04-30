@@ -111,7 +111,7 @@ namespace nspace {
         }
         iofmtguard fmtguard(out);
         out << "(:key1 " << std::oct << src.key1;
-        out << ":key2 " << "(#c " << src.key2.real() << " " << src.key2.imag() << ")";
+        out << ":key2 " << "#c(" << src.key2.real() << " " << src.key2.imag() << ")";
         out << ":key3 \"" << src.key3 << "\":)";
         return out;
     }
