@@ -5,6 +5,8 @@
 #include <fstream>
 #include <vector>
 #include <iterator>
+#include <limits>
+
 int main() {
     using nspace::DataStructure;
     std::vector<DataStructure> data;
