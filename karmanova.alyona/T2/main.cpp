@@ -91,9 +91,7 @@ namespace nspace
     std::istream& operator>>(std::istream& in, UllStruct&& dest);
     std::istream& operator>>(std::istream& in, ComplexStruct&& dest);
     std::istream& operator>>(std::istream& in, StringKeyString&& dest);
-    std::istream& operator>>(std::istream& in, StringKey&& dest);
     std::istream& operator>>(std::istream& in, StringUll&& dest);
-    std::istream& operator>>(std::istream& in, LabelKey&& dest);
     std::istream& operator>>(std::istream& in, LabelUll&& dest);
     std::istream& operator>>(std::istream& in, Data& dest);
     std::istream& operator>>(std::istream& in, std::complex<double>& x);
@@ -107,23 +105,6 @@ namespace nspace
         char c = '0';
         in >> c;
         if (in && (c != dest.exp))
-        {
-            in.setstate(std::ios::failbit);
-        }
-        return in;
-    }
-
-    std::istream& operator>>(std::istream& in, LabelKey&& dest)
-    {
-        std::istream::sentry sentry(in);
-        if (!sentry)
-        {
-            return in;
-        }
-        std::string data = "";
-
-
-        if ((in >> StringKey{data}) && (data != dest.exp))
         {
             in.setstate(std::ios::failbit);
         }
@@ -178,16 +159,6 @@ namespace nspace
             return in;
         }
         return std::getline(in >> DelimiterIO{ '"' }, dest.ref, '"');
-    }
-
-    std::istream& operator>>(std::istream& in, StringKey&& dest)
-    {
-        std::istream::sentry sentry(in);
-        if (!sentry)
-        {
-            return in;
-        }
-        return std::getline(in, dest.ref, ' ');
     }
 
     std::istream& operator>>(std::istream& in, StringUll&& dest)
