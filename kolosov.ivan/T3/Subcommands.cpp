@@ -118,7 +118,7 @@ namespace subcmd
         return (*std::max_element(polygon.points.cbegin(), polygon.points.cend(), comparatorForY)).y;
     }
 
-    shapes::Point& getSide(const shapes::Point& p1, const shapes::Point& p2)
+    shapes::Point getSide(const shapes::Point& p1, const shapes::Point& p2)
     {
         shapes::Point side;
         side.x = p2.x - p1.x;
