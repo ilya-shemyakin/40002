@@ -4,6 +4,7 @@
 #include <vector>
 #include <limits>
 #include <fstream>
+#include <iterator>
 #include <exception>
 
 #include "Shapes.h"
