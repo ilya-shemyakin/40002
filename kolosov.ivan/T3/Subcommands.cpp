@@ -54,7 +54,7 @@ namespace subcmd
         return areaSum + getPolygonArea(polygon);
     }
 
-    double getVertexesArea(double areaSum, const shapes::Polygon& polygon, const int amountOfVertexes)
+    double getVertexesArea(double areaSum, const shapes::Polygon& polygon, const unsigned amountOfVertexes)
     {
         if (polygon.points.size() == amountOfVertexes)
         {
@@ -83,7 +83,7 @@ namespace subcmd
         return polygon.points.size() % 2 != 0;
     }
 
-    bool consistsFromGivenAmountOfVertexes(const shapes::Polygon& polygon, int amountOfVertexes)
+    bool consistsFromGivenAmountOfVertexes(const shapes::Polygon& polygon,const unsigned amountOfVertexes)
     {
         return polygon.points.size() == amountOfVertexes;
     }
