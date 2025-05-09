@@ -81,6 +81,11 @@ void cmd::area(const std::vector< shapes::Polygon >& shapes, std::istream& in, s
 
 void cmd::max(const std::vector< shapes::Polygon >& shapes, std::istream& in, std::ostream& out)
 {
+    if (shapes.size() == 0)
+    {
+        throw std::invalid_argument("No polygons");
+    }
+
     if (in.peek() == '\n')
     {
         throw std::invalid_argument("No param");
@@ -122,6 +127,11 @@ void cmd::max(const std::vector< shapes::Polygon >& shapes, std::istream& in, st
 
 void cmd::min(const std::vector< shapes::Polygon >& shapes, std::istream& in, std::ostream& out)
 {
+    if (shapes.size() == 0)
+    {
+        throw std::invalid_argument("No polygons");
+    }
+
     if (in.peek() == '\n')
     {
         throw std::invalid_argument("No param");
