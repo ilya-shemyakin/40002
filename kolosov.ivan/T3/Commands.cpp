@@ -54,7 +54,7 @@ void cmd::area(const std::vector< shapes::Polygon >& shapes, std::istream& in, s
     }
     else
     {
-        if (!std::all_of(param.begin(), param.end(), std::isdigit))
+        if (!std::all_of(param.begin(), param.end(), static_cast<bool>(std::isdigit)))
         {
             throw std::invalid_argument("Invalid param");
         }
