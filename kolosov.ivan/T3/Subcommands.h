@@ -7,6 +7,7 @@ namespace subcmd
 {
     double getTriangleArea(const shapes::Point& p1,const shapes::Point& p2,const shapes::Point& p3);
     double getPolygonArea(const shapes::Polygon& polygon);
+    bool isDigitButBool(char ch);
     double getAreaOfEven(double areaSum,const shapes::Polygon& polygon);
     double getAreaOfOdd(double areaSum, const shapes::Polygon& polygon);
     double getSumArea(double areaSum, const shapes::Polygon& polygon);
