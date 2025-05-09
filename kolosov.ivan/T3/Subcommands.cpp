@@ -26,6 +26,11 @@ namespace subcmd
         return std::accumulate(triangleAreas.cbegin(), triangleAreas.cend(), 0.0);
     }
 
+    bool isDigitButBool(char ch)
+    {
+        return static_cast<bool>(std::isdigit(ch));
+    }
+
     double getAreaOfEven(double areaSum,const shapes::Polygon& polygon)
     {
         if (polygon.points.size() % 2 == 0)
