@@ -195,7 +195,7 @@ void cmd::count(const std::vector< shapes::Polygon >& shapes, std::istream& in, 
     }
     else
     {
-        if (!std::all_of(param.begin(), param.end(), std::isdigit))
+        if (!std::all_of(param.begin(), param.end(), subcmd::isDigitButBool))
         {
             throw std::invalid_argument("Invalid param");
         }
@@ -274,7 +274,7 @@ void cmd::inframe(const std::vector< shapes::Polygon >& shapes, std::istream& in
     int minYOfPolygon = subcmd::getMinY(polygon);
     int maxYOfPolygon = subcmd::getMaxY(polygon);
 
-    if (minXOfPolygon >= minX && minYOfPolygon >= minY && maxXOfPolygon <= maxX && maxYOfPolygon <= maxX)
+    if (minXOfPolygon >= minX && minYOfPolygon >= minY && maxXOfPolygon <= maxX && maxYOfPolygon <= maxY)
     {
         answer = "<TRUE>";
     }
