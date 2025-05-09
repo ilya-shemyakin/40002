@@ -49,7 +49,7 @@ void cmd::area(const std::vector< shapes::Polygon >& shapes, std::istream& in, s
         }
         else
         {
-            out << "Error occurred! To excute AREA MEAN there must be at least one correct line if file.";
+            throw std::invalid_argument("No args for Mean");
         }
     }
     else
