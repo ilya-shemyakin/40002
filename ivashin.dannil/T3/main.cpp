@@ -205,6 +205,5 @@ int main(int argc, char* argv[]) {
     }
     auto polygons = readPolygons(argv[1]);
     processCommands(polygons);
-    std::cout << '\n';
     return 0;
 }
