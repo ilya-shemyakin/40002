@@ -45,10 +45,10 @@ int main(int argc, char* argv[]) {
             res = Area(geoFigs, command);
             if (res != BAD_RESULT) {
                 // std::cout << "AREA (delete this message) " << command << " " << "\n";
-                std::cout << res << "\n";
+                std::cout << std::fixed << std::setprecision(1) << res << "\n";
             }
             else {
-                std::cout << "INVALID COMMAND\n";
+                std::cout << "<INVALID COMMAND>\n";
             }
         }
         else if (command == "MAX") {
@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
                 std::cout << res << "\n";
             }
             else {
-                std::cout << "INVALID COMMAND\n";
+                std::cout << "<INVALID COMMAND>\n";
             }
         }
         else if (command == "MIN") {
@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
                 std::cout << res << "\n";
             }
             else {
-                std::cout << "INVALID COMMAND\n";
+                std::cout << "<INVALID COMMAND>\n";
             }
         }
         else if (command == "COUNT") {
@@ -80,7 +80,7 @@ int main(int argc, char* argv[]) {
                 std::cout << res << "\n";
             }
             else {
-                std::cout << "INVALID COMMAND\n";
+                std::cout << "<INVALID COMMAND>\n";
             }
         }
         else if (command == "INFRAME") {
@@ -90,20 +90,20 @@ int main(int argc, char* argv[]) {
             Polygon p;
             iss >> p;
             if (!iss) {
-                std::cout << "INVALID COMMAND\n";
+                std::cout << "<INVALID COMMAND>\n";
                 continue;
             }
             int flag = checkPolygonInFrame(p, geoFigs);
             if (flag == BAD_RESULT) {
-                std::cout << "INVALID COMMAND\n";
+                std::cout << "<INVALID COMMAND>\n";
             }
             else {
                 //    std::cout << command << " ";
                 if (flag) {
-                    std::cout << "<true>" << "\n";
+                    std::cout << "<TRUE>" << "\n";
                 }
                 else {
-                    std::cout << "<false>" << "\n";
+                    std::cout << "<FALSE>" << "\n";
                 }
             }
         }
@@ -114,27 +114,16 @@ int main(int argc, char* argv[]) {
             Polygon p;
             iss >> p;
             if (!iss) {
-                std::cout << command << "INVALID COMMAND\n";
+                std::cout << command << "<INVALID COMMAND>\n";
                 continue;
             }
             //std::cout << command << " ";
             std::cout << perms(p, geoFigs) << "\n";
         }
-        else {
-            std::cout << "INVALID COMMAND\n";
-        }
+        //    else {
+        //    std::cout << "<INVALID COMMAND>\n";
+        //}
     }
-
-    /*std::ofstream output("file.txt", std::ios::app);
-    if (output.is_open()) {
-        output << "i am here";
-        output.close();
-        std::cout << "size: " << geoFigs.size();
-    }
-    else {
-        std::cerr << "Не удалось открыть файл для записи." << std::endl;
-    }*/
-
     return 0;
 }
 

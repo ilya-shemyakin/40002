@@ -139,7 +139,7 @@ bool compareByVeg(const Polygon& p1, const Polygon& p2) {
 double maxSometh(const std::vector<Polygon>& polygons, std::string& str) {
     if (polygons.size() > 0) {
         if (str == "AREA") {
-            std::cout << std::setprecision(1);
+            std::cout << std::fixed << std::setprecision(1);
             AreaCalculator calc;
             auto maxPolygon = std::max_element(polygons.begin(), polygons.end(),
                 std::bind(compareByArea, std::placeholders::_1, std::placeholders::_2, std::ref(calc)));
@@ -160,7 +160,7 @@ double minSometh(const std::vector<Polygon>& polygons, std::string& str) {
     AreaCalculator calc;
     if (polygons.size() > 0) {
         if (str == "AREA") {
-            std::cout << std::setprecision(1);
+            std::cout << std::fixed << std::setprecision(1);
             auto minPolygon = std::min_element(polygons.begin(), polygons.end(),
                 std::bind(compareByArea, std::placeholders::_1, std::placeholders::_2, std::ref(calc)));
             if (minPolygon != polygons.end()) { // иначе делать что-то надо
