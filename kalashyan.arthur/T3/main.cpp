@@ -76,7 +76,6 @@ int main(int argc, char* argv[]) {
             polygons.push_back(std::move(poly));
     }
 
-
     std::string cmd;
     while (std::cin >> cmd) {
 
@@ -97,11 +96,10 @@ int main(int argc, char* argv[]) {
 
             if (arg=="MEAN"&&!polygons.empty()) total/=polygons.size();
 
-            std::cout<<"AREA "<<arg<<"\n"<<std::fixed<<std::setprecision(1)<<total<<"\n";
+            std::cout <<std::fixed << std::setprecision(1) << total << "\n";
             if (arg=="MEAN" && !polygons.empty())
                 total /= polygons.size();
-            std::cout << "AREA " << arg << "\n"
-                      << std::fixed << std::setprecision(1) << total << "\n";
+            std::cout << std::fixed << std::setprecision(1) << total << "\n";
         }
 
         else if (cmd == "MAX") {
@@ -112,14 +110,14 @@ int main(int argc, char* argv[]) {
                         return calculateArea(a) < calculateArea(b);
                     });
                 double v = it==polygons.end() ? 0.0 : calculateArea(*it);
-                std::cout << "MAX AREA\n" << std::fixed << std::setprecision(1) << v << "\n";
+                std::cout << std::fixed << std::setprecision(1) << v << "\n";
             } else {
                 auto it = std::max_element(polygons.begin(), polygons.end(),
                     [&](Polygon const& a, Polygon const& b){
                         return a.points.size() < b.points.size();
                     });
                 int v = it==polygons.end() ? 0 : it->points.size();
-                std::cout << "MAX VERTEXES\n" << v << "\n";
+                std::cout << v << "\n";
             }
         }
 
@@ -131,14 +129,14 @@ int main(int argc, char* argv[]) {
                         return calculateArea(a) < calculateArea(b);
                     });
                 double v = it==polygons.end() ? 0.0 : calculateArea(*it);
-                std::cout << "MIN AREA\n" << std::fixed << std::setprecision(1) << v << "\n";
+                std::cout << std::fixed << std::setprecision(1) << v << "\n";
             } else {
                 auto it = std::min_element(polygons.begin(), polygons.end(),
                     [&](Polygon const& a, Polygon const& b){
                         return a.points.size() < b.points.size();
                     });
                 int v = it==polygons.end() ? 0 : it->points.size();
-                std::cout << "MIN VERTEXES\n" << v << "\n";
+                std::cout << v << "\n";
             }
         }
 
@@ -153,7 +151,7 @@ int main(int argc, char* argv[]) {
                         ? ((p.points.size()%2==0)==(arg=="EVEN"))
                         : p.points.size()==v;
                 }));
-            std::cout<<"COUNT "<<arg<<"\n"<<cnt<<"\n";
+            std::cout << cnt << "\n";
         }
 
         else if (cmd=="PERMS" || cmd=="MAXSEQ") {
@@ -180,8 +178,7 @@ int main(int argc, char* argv[]) {
                       std::sort(tmp.begin(), tmp.end());
                       return tmp==normQ;
                     }));
-                std::cout << "PERMS";
-                std::cout << "\n" << c << "\n";
+                std::cout << c << "\n";
             } else {
                 struct S{int cur,best;};
                 S r = std::accumulate(polygons.begin(), polygons.end(), S{0,0},
@@ -195,8 +192,7 @@ int main(int argc, char* argv[]) {
                     } else s.cur = 0;
                     return s;
                   });
-                std::cout << "MAXSEQ";
-                std::cout << "\n" << r.best << "\n";
+                std::cout << r.best << "\n";
             }
         }
 
