@@ -20,7 +20,6 @@ struct Polygon {
     std::vector<Point> points;
 };
 
-
 bool readPolygon(std::string const& line, Polygon& poly) {
     std::istringstream iss(line);
     int n;
@@ -30,7 +29,7 @@ bool readPolygon(std::string const& line, Polygon& poly) {
         std::istream_iterator<std::string>(iss),
         std::istream_iterator<std::string>()
     };
-    if ((int)tokens.size() != n) return false;
+    if (static_cast<int>(tokens.size()) != n) return false;
 
     poly.points.clear();
     std::transform(tokens.begin(), tokens.end(), std::back_inserter(poly.points),
@@ -82,18 +81,23 @@ int main(int argc, char* argv[]) {
     while (std::cin >> cmd) {
 
         if (cmd == "AREA") {
-            std::string arg; std::cin >> arg;
+            std::string arg; std::cin>>arg;
+            std::size_t v=0;
 
-            double total = std::accumulate(polygons.begin(), polygons.end(), 0.0,
-                [&](double acc, Polygon const& p){
-                    bool take =
-                        (arg=="EVEN" || arg=="ODD")
-                          ? ((p.points.size()%2==0)==(arg=="EVEN"))
-                          : (arg=="MEAN"
-                             ? true
-                             : p.points.size()==std::stoi(arg));
-                    return take ? acc + calculateArea(p) : acc;
+            if (arg!="EVEN"&&arg!="ODD"&&arg!="MEAN")
+                v = std::stoul(arg);
+
+            double total = std::accumulate(polygons.begin(),polygons.end(),0.0,
+                [&](double acc, auto const& p){
+                    bool take = (arg=="EVEN"||arg=="ODD")
+                        ? ((p.points.size()%2==0)==(arg=="EVEN"))
+                        : (arg=="MEAN"? true : p.points.size()==v);
+                    return take? acc+calculateArea(p): acc;
                 });
+
+            if (arg=="MEAN"&&!polygons.empty()) total/=polygons.size();
+
+            std::cout<<"AREA "<<arg<<"\n"<<std::fixed<<std::setprecision(1)<<total<<"\n";
             if (arg=="MEAN" && !polygons.empty())
                 total /= polygons.size();
             std::cout << "AREA " << arg << "\n"
@@ -139,14 +143,17 @@ int main(int argc, char* argv[]) {
         }
 
         else if (cmd == "COUNT") {
-            std::string arg; std::cin >> arg;
-            int cnt = std::count_if(polygons.begin(), polygons.end(),
-                [&](Polygon const& p){
+            std::string arg; std::cin>>arg;
+            std::size_t v=0;
+            if (arg!="EVEN"&&arg!="ODD")
+                v=std::stoul(arg);
+            int cnt = static_cast<int>(std::count_if(polygons.begin(),polygons.end(),
+                [&](auto const& p){
                     return (arg=="EVEN"||arg=="ODD")
-                      ? ((p.points.size()%2==0)==(arg=="EVEN"))
-                      : p.points.size()==std::stoi(arg);
-                });
-            std::cout << "COUNT " << arg << "\n" << cnt << "\n";
+                        ? ((p.points.size()%2==0)==(arg=="EVEN"))
+                        : p.points.size()==v;
+                }));
+            std::cout<<"COUNT "<<arg<<"\n"<<cnt<<"\n";
         }
 
         else if (cmd=="PERMS" || cmd=="MAXSEQ") {
@@ -168,7 +175,7 @@ int main(int argc, char* argv[]) {
                 int c = static_cast<int>(
                   std::count_if(polygons.begin(), polygons.end(),
                     [&](Polygon const& p){
-                      if ((int)p.points.size()!=n) return false;
+                      if (static_cast<int>(p.points.size())!=n) return false;
                       auto tmp = p.points;
                       std::sort(tmp.begin(), tmp.end());
                       return tmp==normQ;
@@ -179,7 +186,7 @@ int main(int argc, char* argv[]) {
                 struct S{int cur,best;};
                 S r = std::accumulate(polygons.begin(), polygons.end(), S{0,0},
                   [&](S s, Polygon const& p){
-                    if ((int)p.points.size()!=n) {
+                    if (static_cast<int>(p.points.size())!=n) {
                       s.cur=0; return s;
                     }
                     auto tmp = p.points; std::sort(tmp.begin(), tmp.end());
