@@ -77,7 +77,7 @@ int main(int argc, char* argv[]) {
             polygons.push_back(std::move(poly));
     }
 
-    
+
     std::string cmd;
     while (std::cin >> cmd) {
 
@@ -152,7 +152,7 @@ int main(int argc, char* argv[]) {
         else if (cmd=="PERMS" || cmd=="MAXSEQ") {
             std::string rest;
             std::getline(std::cin, rest);
-            
+
             int n = static_cast<int>(std::count(rest.begin(), rest.end(), '('));
             std::string polyLine = std::to_string(n) + " " + rest;
             Polygon query;
@@ -160,7 +160,7 @@ int main(int argc, char* argv[]) {
                 std::cout << "<INVALID COMMAND>\n";
                 continue;
             }
-            
+
             auto normQ = query.points;
             std::sort(normQ.begin(), normQ.end());
 
