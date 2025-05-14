@@ -174,10 +174,6 @@ int main(int argc, char* argv[]) {
                       return tmp==normQ;
                     }));
                 std::cout << "PERMS";
-                std::for_each(query.points.begin(), query.points.end(),
-                    [&](Point const& pt){
-                        std::cout<<" ("<<pt.x<<";"<<pt.y<<")";
-                    });
                 std::cout << "\n" << c << "\n";
             } else {
                 struct S{int cur,best;};
@@ -193,10 +189,6 @@ int main(int argc, char* argv[]) {
                     return s;
                   });
                 std::cout << "MAXSEQ";
-                std::for_each(query.points.begin(), query.points.end(),
-                    [&](Point const& pt){
-                        std::cout<<" ("<<pt.x<<";"<<pt.y<<")";
-                    });
                 std::cout << "\n" << r.best << "\n";
             }
         }
