@@ -97,9 +97,6 @@ int main(int argc, char* argv[]) {
             if (arg=="MEAN"&&!polygons.empty()) total/=polygons.size();
 
             std::cout <<std::fixed << std::setprecision(1) << total << "\n";
-            if (arg=="MEAN" && !polygons.empty())
-                total /= polygons.size();
-            std::cout << std::fixed << std::setprecision(1) << total << "\n";
         }
 
         else if (cmd == "MAX") {
