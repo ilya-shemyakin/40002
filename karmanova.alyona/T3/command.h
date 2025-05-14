@@ -65,11 +65,12 @@ double accumulateAll(double sum, const Polygon& p, AreaCalculator& calc) {
 }
 
 double accumulateNumber(double sum, const Polygon& p, AreaCalculator& calc, int number) {
-    return (number == p.points.size()) ? sum + calc(p) : sum;
+    return (static_cast<size_t>(number) == p.points.size()) ? sum + calc(p) : sum;
+    // я ранее выъожу из фунции, если number < 0
 }
 
 bool hasCountVerticales(const Polygon& p, int count) {
-    return p.points.size() == count;
+    return p.points.size() == static_cast<size_t>(count);
 }
 
 double accumulateEvenAreas(double sum, const Polygon& p, AreaCalculator& calc) {
@@ -79,7 +80,6 @@ double accumulateEvenAreas(double sum, const Polygon& p, AreaCalculator& calc) {
 double Area(const std::vector<Polygon>& polygons, std::string str) {
     AreaCalculator calc;
     std::cout << std::setprecision(1);
-    // используем обёртку вокруг accumulate
     if (str == "EVEN") {
         return std::accumulate(
             polygons.begin(),
@@ -112,6 +112,9 @@ double Area(const std::vector<Polygon>& polygons, std::string str) {
     else {
         try {
             int number = std::stoi(str); // выкинет исключение если не выйдет
+            if (number <= 0) {
+                return 0;
+            }
             return std::accumulate(
                 polygons.begin(),
                 polygons.end(),
@@ -119,7 +122,7 @@ double Area(const std::vector<Polygon>& polygons, std::string str) {
                 std::bind(accumulateNumber, std::placeholders::_1, std::placeholders::_2, std::ref(calc), number)
             );
         }
-        catch (std::exception& e){
+        catch (std::exception& e) {
             return -1;
         }
     }
@@ -182,28 +185,39 @@ int countSomt(const std::vector<Polygon>& polygons, std::string str) {
         return polygons.size() - std::count_if(polygons.begin(), polygons.end(), hasEvenPoints);
     }
     else {
-        int number = std::stoi(str); // throw
-        return std::count_if(polygons.begin(), polygons.end(), std::bind(hasCountVerticales, std::placeholders::_1, number));
+        try {
+            int number = std::stoi(str); // throw
+            if (number <= 0) {
+                return 0;
+            }
+            return std::count_if(polygons.begin(), polygons.end(), std::bind(hasCountVerticales, std::placeholders::_1, number));
+        }
+        catch (std::exception& e) {
+            return -1;
+        }
     }
 }
 
-bool compareBeCoordPoint(const Point& p1, const Point& p2,const std::string& coor) {
+bool compareBeCoordPoint(const Point& p1, const Point& p2, const std::string& coor) {
     if (coor == "x") {
         return p1.x < p2.x;
     }
     return p1.y < p2.y;
 }
 
-bool compareBeCoordPolygons(const Polygon& p1, const Polygon& p2, const std::string& coor) {
+int compareBeCoordPolygons(const Polygon& p1, const Polygon& p2, const std::string& coor) {
     auto minCoorPoint1 = std::min_element(p1.points.begin(), p1.points.end(),
         std::bind(compareBeCoordPoint, std::placeholders::_1, std::placeholders::_2, coor));
     auto minCoorPoint2 = std::min_element(p2.points.begin(), p2.points.end(),
         std::bind(compareBeCoordPoint, std::placeholders::_1, std::placeholders::_2, coor));
-    if (minCoorPoint1 != p1.points.end() && minCoorPoint2 != p2.points.end()) {
+    try {
         if (coor == "x") {
             return minCoorPoint1->x < minCoorPoint2->x;
         }
         return minCoorPoint1->y < minCoorPoint2->y;
+    }
+    catch (std::exception&) {
+        return false;
     }
 }
 // тут получаю крайние точки прямоуга
@@ -256,7 +270,7 @@ std::vector<Point> getInframePoints(const std::vector<Polygon>& polygons) {
 
 // туту проверяю принадлежит ли точка прямоугу
 bool isPointInFrame(const Point& p, const std::vector<Point>& v) {
-    return ((v[0].x <= p.x) && (p.x <= v[1].x)) && (v[0].y <= p.y <= v[1].y);
+    return (v[0].x <= p.x) && (p.x <= v[1].x) && (v[0].y <= p.y) && (p.y <= v[1].y);
 }
 // тут мне нужна - фигура искомая и результат getInFrame
 // передать надо мой вектор, чтобы получить прямоуг и искомую фигуру
@@ -265,14 +279,14 @@ int checkPolygonInFrame(const Polygon& p, const std::vector<Polygon>& vPoly) {
         return -1;
     }
     std::vector<Point> vFrame = getInframePoints(vPoly);
-    std::cout << "\nграницы: ";
+    /*std::cout << "\nграницы: ";
     for (const Point& p : vFrame) {
         std::cout << p << " ";
-    }
+    }*/
     std::cout << std::endl;
     int cnt = std::count_if(p.points.begin(), p.points.end(),
         std::bind(isPointInFrame, std::placeholders::_1, vFrame));
-    return cnt == p.points.size();
+    return cnt == static_cast<int>(p.points.size());
 }
 
 

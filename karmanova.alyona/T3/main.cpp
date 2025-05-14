@@ -5,6 +5,8 @@
 #include "geo.h"
 #include <iomanip>
 #include <sstream>
+#include <limits>
+
 int main(int argc, char* argv[]) {
     const int BAD_RESULT = -1;
     if (argc < 2) {
@@ -21,7 +23,7 @@ int main(int argc, char* argv[]) {
     Polygon p;
     std::vector<Polygon> geoFigs;
     while (!file.eof())
-        {
+    {
         std::copy(std::istream_iterator<Polygon>(file), std::istream_iterator<Polygon>(), std::back_inserter(geoFigs));
         if (!file) {
             file.clear();
@@ -32,7 +34,7 @@ int main(int argc, char* argv[]) {
     // std::ifstream fileCom("com.txt");
     std::istream& fileCom = std::cin;
     std::string command;
-    int res;
+    double res;
     while (!fileCom.eof()) {
         fileCom >> command;
         res = BAD_RESULT;
@@ -42,7 +44,7 @@ int main(int argc, char* argv[]) {
             fileCom >> command;
             res = Area(geoFigs, command);
             if (res != BAD_RESULT) {
-               // std::cout << "AREA (delete this message) " << command << " " << "\n";
+                // std::cout << "AREA (delete this message) " << command << " " << "\n";
                 std::cout << res << "\n";
             }
             else {
@@ -53,7 +55,7 @@ int main(int argc, char* argv[]) {
             fileCom >> command;
             res = maxSometh(geoFigs, command);
             if (res != BAD_RESULT) {
-             //   std::cout << "MAX (delete this message) " << command << " " << "\n";
+                //   std::cout << "MAX (delete this message) " << command << " " << "\n";
                 std::cout << res << "\n";
             }
             else {
@@ -64,7 +66,7 @@ int main(int argc, char* argv[]) {
             fileCom >> command;
             res = minSometh(geoFigs, command);
             if (res != BAD_RESULT) {
-              //  std::cout << "MIN (delete this message) " << command << " " << "\n";
+                //  std::cout << "MIN (delete this message) " << command << " " << "\n";
                 std::cout << res << "\n";
             }
             else {
@@ -72,13 +74,16 @@ int main(int argc, char* argv[]) {
             }
         }
         else if (command == "COUNT") {
-            //std::cout << command << " ";
             fileCom >> command;
-            //std::cout << command << " ";
-            std::cout << countSomt(geoFigs, command) << "\n";
-
+            res = countSomt(geoFigs, command);
+            if (res != BAD_RESULT) {
+                std::cout << res << "\n";
+            }
+            else {
+                std::cout << "INVALID COMMAND\n";
+            }
         }
-            else if (command == "INFRAME") {
+        else if (command == "INFRAME") {
             std::string line;
             std::getline(fileCom, line);
             std::istringstream iss(line);
@@ -93,7 +98,7 @@ int main(int argc, char* argv[]) {
                 std::cout << "INVALID COMMAND\n";
             }
             else {
-            //    std::cout << command << " ";
+                //    std::cout << command << " ";
                 if (flag) {
                     std::cout << "<true>" << "\n";
                 }
@@ -102,7 +107,7 @@ int main(int argc, char* argv[]) {
                 }
             }
         }
-            else if (command == "PERMS") {
+        else if (command == "PERMS") {
             std::string line;
             std::getline(fileCom, line);
             std::istringstream iss(line);
@@ -115,7 +120,7 @@ int main(int argc, char* argv[]) {
             //std::cout << command << " ";
             std::cout << perms(p, geoFigs) << "\n";
         }
-            else {
+        else {
             std::cout << "INVALID COMMAND\n";
         }
     }
