@@ -56,7 +56,7 @@ std::istream& operator>>(std::istream& input, DataStruct& data) {
                 valid = false;
                 break;
             }
-            char suffix[3];
+            char suffix[4];
             if (!input.get(suffix, 4) || std::string(suffix) != "ull") {
                 valid = false;
                 break;
@@ -96,9 +96,7 @@ std::istream& operator>>(std::istream& input, DataStruct& data) {
             keysPresent[2] = true;
         }
         else {
-            if (token != ")") {
-                valid = false;
-            }
+            valid = false;
             break;
         }
     }
@@ -137,18 +135,10 @@ bool compareData(const DataStruct& first, const DataStruct& second) {
 
 int main() {
     std::vector<DataStruct> ds;
-    while (!std::cin.eof()) {
-        std::copy(
-            std::istream_iterator<DataStruct>(std::cin),
-            std::istream_iterator<DataStruct>(),
-            std::back_inserter(ds)
-        );
-        if (!std::cin.fail()) {
-            continue;
-        }
-        std::cin.clear();
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    }
+    DataStruct temp;
+    while (std::cin >> temp) {
+        ds.push_back(temp);
+        std::cin >> std::ws; 
     std::sort(ds.begin(), ds.end(), compareData);
     std::copy(
         ds.begin(),
