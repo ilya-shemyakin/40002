@@ -89,7 +89,7 @@ std::istream& operator>>(std::istream& in, std::pair<char, UnsignedLongLongIO>&&
         return in;
     }
 
-    in >> DelimiterIO{ '0' } >> DelimiterIO{ dest.first }; // Expect '0x' or '0X'
+    in >> DelimiterIO{ '0' } >> DelimiterIO{ dest.first };
     if (in) {
         in >> std::hex >> dest.second.ref >> std::dec;
     }
