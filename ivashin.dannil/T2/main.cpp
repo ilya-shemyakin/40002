@@ -27,125 +27,105 @@ private:
     std::ios_base::fmtflags flags_;
 };
 
-struct DelimiterIO {
-    char exp;
-};
-
-struct UnsignedLongLongIO {
-    unsigned long long& ref;
-};
-
-struct StringIO {
-    std::string& ref;
-};
-
-std::istream& operator>>(std::istream& in, DelimiterIO&& dest) {
-    std::istream::sentry sentry(in);
+std::istream& operator>>(std::istream& input, DataStruct& data) {
+    std::istream::sentry sentry(input);
     if (!sentry) {
-        return in;
+        return input;
     }
 
+    DataStruct temp;
     char c;
-    in >> c;
+    std::string token;
 
-    if (in && (c != dest.exp)) {
-        in.setstate(std::ios::failbit);
-    }
-    return in;
-}
-
-std::istream& operator>>(std::istream& in, UnsignedLongLongIO&& dest) {
-    std::istream::sentry sentry(in);
-    if (!sentry) {
-        return in;
+    if (!(input >> c) || c != '(') {
+        input.setstate(std::ios::failbit);
+        return input;
     }
 
-    in >> dest.ref;
-    if (in) {
-        char suffix[3];
-        if (in >> suffix[0] && in >> suffix[1] && in >> suffix[2] &&
-            (suffix[0] == 'u' || suffix[0] == 'U') &&
-            (suffix[1] == 'l' || suffix[1] == 'L') &&
-            (suffix[2] == 'l' || suffix[2] == 'L')) {
-        }
-        else {
-            in.setstate(std::ios::failbit);
-        }
-    }
-    return in;
-}
-
-std::istream& operator>>(std::istream& in, StringIO&& dest) {
-    std::istream::sentry sentry(in);
-    if (!sentry) {
-        return in;
-    }
-    return std::getline(in >> DelimiterIO{ '"' }, dest.ref, '"');
-}
-
-std::istream& operator>>(std::istream& in, std::pair<char, UnsignedLongLongIO>&& dest) {
-    std::istream::sentry sentry(in);
-    if (!sentry) {
-        return in;
-    }
-
-    in >> DelimiterIO{ '0' } >> DelimiterIO{ dest.first };
-    if (in) {
-        in >> std::hex >> dest.second.ref >> std::dec;
-    }
-    return in;
-}
-
-std::istream& operator>>(std::istream& in, DataStruct& dest) {
-    std::istream::sentry sentry(in);
-    if (!sentry) {
-        return in;
-    }
-
-    DataStruct input;
-    using sep = DelimiterIO;
-    using ull = UnsignedLongLongIO;
-    using str = StringIO;
-
+    bool valid = true;
     bool keysPresent[3] = { false, false, false };
 
-    in >> sep{ '(' };
-    std::string label;
-    while (in && (!keysPresent[0] || !keysPresent[1] || !keysPresent[2])) {
-        if (!(in >> sep{ ':' } >> label)) {
-            in.setstate(std::ios::failbit);
+    while (valid && input >> c && c == ':') {
+        if (!(input >> token)) {
+            valid = false;
             break;
         }
 
-        if (label == "key1" && !keysPresent[0]) {
-            in >> ull{ input.key1_ };
+        if (token == "key1" && !keysPresent[0]) {
+            std::string valueStr;
+            char nextChar;
+            while (input.get(nextChar)) {
+                if (nextChar == ':' || nextChar == ')') {
+                    input.putback(nextChar);
+                    break;
+                }
+                valueStr += nextChar;
+            }
+
+            if (valueStr.size() < 3 ||
+                (valueStr.substr(valueStr.size() - 3) != "ull" &&
+                    valueStr.substr(valueStr.size() - 3) != "ULL")) {
+                valid = false;
+                break;
+            }
+
+            std::istringstream iss(valueStr.substr(0, valueStr.size() - 3));
+            unsigned long long value;
+            if (!(iss >> value) || iss.rdbuf()->in_avail() > 0) {
+                valid = false;
+                break;
+            }
+            temp.key1_ = value;
             keysPresent[0] = true;
         }
-        else if (label == "key2" && !keysPresent[1]) {
-            in >> std::pair<char, ull>{'x', ull{ input.key2_ }};
+        else if (token == "key2" && !keysPresent[1]) {
+            if (!(input >> c) || c != '0') {
+                valid = false;
+                break;
+            }
+            if (!(input >> c) || (c != 'x' && c != 'X')) {
+                valid = false;
+                break;
+            }
+
+            unsigned long long value;
+            if (!(input >> std::hex >> value)) {
+                valid = false;
+                break;
+            }
+            temp.key2_ = value;
             keysPresent[1] = true;
         }
-        else if (label == "key3" && !keysPresent[2]) {
-            in >> str{ input.key3_ };
+        else if (token == "key3" && !keysPresent[2]) {
+            input >> std::ws;
+            if (input.get() != '"') {
+                valid = false;
+                break;
+            }
+            std::getline(input, temp.key3_, '"');
+            if (input.fail()) {
+                valid = false;
+                break;
+            }
             keysPresent[2] = true;
         }
         else {
-            in.setstate(std::ios::failbit);
+            if (token != ")") {
+                valid = false;
+            }
             break;
         }
     }
 
-    if (in && keysPresent[0] && keysPresent[1] && keysPresent[2]) {
-        in >> sep{ ')' };
-        if (in) {
-            dest = input;
-        }
-    }
-    else {
-        in.setstate(std::ios::failbit);
+    if (valid && keysPresent[0] && keysPresent[1] && keysPresent[2]) {
+        data = temp;
     }
 
-    return in;
+    if (!valid) {
+        input.setstate(std::ios::failbit);
+    }
+
+    return input;
 }
 
 std::ostream& operator<<(std::ostream& output, const DataStruct& data) {
@@ -160,6 +140,8 @@ std::ostream& operator<<(std::ostream& output, const DataStruct& data) {
     return output;
 }
 
+
+
 bool compareData(const DataStruct& first, const DataStruct& second) {
     if (first.key1_ != second.key1_) {
         return first.key1_ < second.key1_;
@@ -171,6 +153,13 @@ bool compareData(const DataStruct& first, const DataStruct& second) {
 }
 
 int main() {
+
+    //----Test----
+
+    /*DataStruct d;
+    std::cin >> d;
+    std::cout << d;*/
+
     std::vector<DataStruct> ds;
     while (!std::cin.eof()) {
         std::copy(
