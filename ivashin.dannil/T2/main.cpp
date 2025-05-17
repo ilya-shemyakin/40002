@@ -36,6 +36,8 @@ std::istream& operator>>(std::istream& input, DataStruct& data) {
     char c;
     std::string token;
 
+    // Пропустить пробелы и переносы строк до начала объекта
+    input >> std::ws;
     if (!(input >> c) || c != '(') {
         input.setstate(std::ios::failbit);
         return input;
@@ -101,6 +103,11 @@ std::istream& operator>>(std::istream& input, DataStruct& data) {
         }
     }
 
+    // Проверяем, что объект завершён
+    if (valid && input >> c && c != ':') {
+        input.putback(c);
+    }
+
     if (valid && keysPresent[0] && keysPresent[1] && keysPresent[2]) {
         data = temp;
     }
@@ -135,10 +142,31 @@ bool compareData(const DataStruct& first, const DataStruct& second) {
 
 int main() {
     std::vector<DataStruct> ds;
-    DataStruct temp;
-    while (std::cin >> temp) {
-        ds.push_back(temp);
-        std::cin >> std::ws; 
+    while (!std::cin.eof()) {
+        // Очистить состояние потока, если была ошибка
+        std::cin.clear();
+        // Пропустить до начала следующего потенциального объекта
+        char c;
+        while (std::cin.get(c) && c != '(' && !std::cin.eof()) {
+            if (c == '\n') break; // Пропустить строку до конца
+        }
+        if (c == '(') {
+            std::cin.putback(c); // Вернуть '(' в поток
+            // Прочитать объекты с помощью std::copy
+            auto start_size = ds.size();
+            std::copy(
+                std::istream_iterator<DataStruct>(std::cin),
+                std::istream_iterator<DataStruct>(),
+                std::back_inserter(ds)
+            );
+            if (ds.size() > start_size) {
+                // Успешно прочитан хотя бы один объект, продолжить
+                continue;
+            }
+        }
+        // Если не нашли '(', пропустить до конца строки
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    }
     std::sort(ds.begin(), ds.end(), compareData);
     std::copy(
         ds.begin(),
