@@ -17,8 +17,9 @@ class IofmtGuard {
 public:
     IofmtGuard(std::basic_ios<char>& stream) :
         stream_(stream),
-        flags_(stream.flags()) 
-    {}
+        flags_(stream.flags())
+    {
+    }
     ~IofmtGuard() { stream_.flags(flags_); }
 
 private:
@@ -146,8 +147,6 @@ std::ostream& operator<<(std::ostream& output, const DataStruct& data) {
     return output;
 }
 
-
-
 bool compareData(const DataStruct& first, const DataStruct& second) {
     if (first.key1_ != second.key1_) {
         return first.key1_ < second.key1_;
@@ -159,32 +158,31 @@ bool compareData(const DataStruct& first, const DataStruct& second) {
 }
 
 int main() {
-
     //----Test----
-
     /*DataStruct d;
     std::cin >> d;
     std::cout << d;*/
 
-     std::vector<DataStruct> ds;
-     while (!std::cin.eof()) {
-         std::copy(
-             std::istream_iterator<DataStruct>(std::cin),
-             std::istream_iterator<DataStruct>(),
-             std::back_inserter(ds)
-         );
-         if (!std::cin.fail()) {
-             continue;
-         }
-         std::cin.clear();
-         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-     }
-     std::sort(ds.begin(), ds.end(), compareData);
-     std::copy(
-         ds.begin(),
-         ds.end(),
-         std::ostream_iterator<DataStruct>(std::cout, "\n")
-     );
+    std::vector<DataStruct> ds;
+    while (!std::cin.eof()) {
+        std::copy(
+            std::istream_iterator<DataStruct>(std::cin),
+            std::istream_iterator<DataStruct>(),
+            std::back_inserter(ds)
+        );
+        if (!std::cin.fail()) {
+            continue;
+        }
+        // std::cerr << "Ошибка ввода, строка пропущена\n";
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    }
+    std::sort(ds.begin(), ds.end(), compareData);
+    std::copy(
+        ds.begin(),
+        ds.end(),
+        std::ostream_iterator<DataStruct>(std::cout, "\n")
+    );
 
-     return 0;
+    return 0;
 }
