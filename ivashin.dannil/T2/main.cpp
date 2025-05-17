@@ -15,7 +15,10 @@ struct DataStruct {
 
 class IofmtGuard {
 public:
-    IofmtGuard(std::basic_ios<char>& stream) : stream_(stream), flags_(stream.flags()) {}
+    IofmtGuard(std::basic_ios<char>& stream) :
+        stream_(stream),
+        flags_(stream.flags()) 
+    {}
     ~IofmtGuard() { stream_.flags(flags_); }
 
 private:
@@ -49,13 +52,9 @@ std::istream& operator>>(std::istream& input, DataStruct& data) {
 
         if (token == "key1" && !keysPresent[0]) {
             std::string valueStr;
-            char nextChar;
-            while (input.get(nextChar)) {
-                if (nextChar == ':' || nextChar == ')') {
-                    input.putback(nextChar);
-                    break;
-                }
-                valueStr += nextChar;
+            if (!(input >> valueStr)) {
+                valid = false;
+                break;
             }
 
             if (valueStr.size() < 3 ||
@@ -65,10 +64,21 @@ std::istream& operator>>(std::istream& input, DataStruct& data) {
                 break;
             }
 
-            std::istringstream iss(valueStr.substr(0, valueStr.size() - 3));
-            unsigned long long value;
-            if (!(iss >> value) || iss.rdbuf()->in_avail() > 0) {
+            std::string numStr = valueStr.substr(0, valueStr.size() - 3);
+            if (numStr.empty() || numStr[0] == '-') {
                 valid = false;
+                break;
+            }
+
+            unsigned long long value = 0;
+            for (char digit : numStr) {
+                if (!std::isdigit(digit)) {
+                    valid = false;
+                    break;
+                }
+                value = value * 10 + (digit - '0');
+            }
+            if (!valid) {
                 break;
             }
             temp.key1_ = value;
