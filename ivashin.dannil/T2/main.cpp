@@ -53,9 +53,13 @@ std::istream& operator>>(std::istream& input, DataStruct& data) {
 
         if (token == "key1" && !keysPresent[0]) {
             std::string valueStr;
-            if (!(input >> valueStr)) {
-                valid = false;
-                break;
+            char nextChar;
+            while (input.get(nextChar)) {
+                if (nextChar == ':' || nextChar == ')') {
+                    input.putback(nextChar);
+                    break;
+                }
+                valueStr += nextChar;
             }
 
             if (valueStr.size() < 3 ||
@@ -65,21 +69,10 @@ std::istream& operator>>(std::istream& input, DataStruct& data) {
                 break;
             }
 
-            std::string numStr = valueStr.substr(0, valueStr.size() - 3);
-            if (numStr.empty() || numStr[0] == '-') {
+            std::istringstream iss(valueStr.substr(0, valueStr.size() - 3));
+            unsigned long long value;
+            if (!(iss >> value) || iss.rdbuf()->in_avail() > 0) {
                 valid = false;
-                break;
-            }
-
-            unsigned long long value = 0;
-            for (char digit : numStr) {
-                if (!std::isdigit(digit)) {
-                    valid = false;
-                    break;
-                }
-                value = value * 10 + (digit - '0');
-            }
-            if (!valid) {
                 break;
             }
             temp.key1_ = value;
@@ -147,6 +140,8 @@ std::ostream& operator<<(std::ostream& output, const DataStruct& data) {
     return output;
 }
 
+
+
 bool compareData(const DataStruct& first, const DataStruct& second) {
     if (first.key1_ != second.key1_) {
         return first.key1_ < second.key1_;
@@ -158,7 +153,9 @@ bool compareData(const DataStruct& first, const DataStruct& second) {
 }
 
 int main() {
+
     //----Test----
+
     /*DataStruct d;
     std::cin >> d;
     std::cout << d;*/
@@ -173,7 +170,6 @@ int main() {
         if (!std::cin.fail()) {
             continue;
         }
-        // std::cerr << "Ошибка ввода, строка пропущена\n";
         std::cin.clear();
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
