@@ -5,6 +5,7 @@
 #include <sstream>
 #include <vector>
 #include <functional>
+#include <numeric>
 #include <cmath>
 
 struct Point {
@@ -85,6 +86,7 @@ Polygon parsePolygon(const std::string& line) {
 std::vector<Polygon> readPolygons(const std::string& filename) {
     std::vector<Polygon> polygons;
     std::ifstream file(filename);
+    if (!file.is_open()) return polygons;
     std::string line;
     while (std::getline(file, line)) {
         Polygon poly = parsePolygon(line);
@@ -100,47 +102,73 @@ void processCommands(std::vector<Polygon>& polygons) {
         if (command == "AREA") {
             std::string param;
             std::cin >> param;
+            if (polygons.empty()) {
+                std::cout << "<INVALID COMMAND>\n";
+                continue;
+            }
             if (param == "EVEN" || param == "ODD") {
                 bool even = param == "EVEN";
-                double sum = std::accumulate(polygons.begin(), polygons.end(), 0.0,
-                    [even](double acc, const Polygon& p) {
-                        return acc + ((p.points.size() % 2 == (even ? 0 : 1)) ? calculateArea(p) : 0.0);
-                    });
+                auto areaSum = std::bind([](const Polygon& p, bool e) {
+                    return (p.points.size() % 2 == (e ? 0 : 1)) ? calculateArea(p) : 0.0;
+                    }, std::placeholders::_1, even);
+                double sum = std::accumulate(polygons.begin(), polygons.end(), 0.0, areaSum);
                 std::cout << sum << '\n';
             }
             else if (param == "MEAN") {
-                if (polygons.empty()) {
-                    std::cout << "<INVALID COMMAND>\n";
-                }
-                else {
-                    double sum = std::accumulate(polygons.begin(), polygons.end(), 0.0,
-                        [](double acc, const Polygon& p) { return acc + calculateArea(p); });
-                    std::cout << sum / polygons.size() << '\n';
-                }
+                double sum = std::accumulate(polygons.begin(), polygons.end(), 0.0,
+                    [](double acc, const Polygon& p) { return acc + calculateArea(p); });
+                std::cout << sum / polygons.size() << '\n';
             }
             else {
-                int n = std::stoi(param);
-                double sum = std::accumulate(polygons.begin(), polygons.end(), 0.0,
-                    [n](double acc, const Polygon& p) {
-                        return acc + (p.points.size() == static_cast<size_t>(n) ? calculateArea(p) : 0.0);
-                    });
-                std::cout << sum << '\n';
+                try {
+                    int n = std::stoi(param);
+                    if (n <= 0) throw std::invalid_argument("Non-positive vertex count");
+                    auto areaSum = std::bind([](const Polygon& p, size_t n) {
+                        return p.points.size() == n ? calculateArea(p) : 0.0;
+                        }, std::placeholders::_1, static_cast<size_t>(n));
+                    double sum = std::accumulate(polygons.begin(), polygons.end(), 0.0, areaSum);
+                    std::cout << sum << '\n';
+                }
+                catch (...) {
+                    std::cout << "<INVALID COMMAND>\n";
+                }
             }
         }
-        else if (command == "MAX" || command == "MIN") {
-            bool isMax = command == "MAX";
+        else if (command == "MAX") {
             std::string param;
             std::cin >> param;
             if (polygons.empty()) {
                 std::cout << "<INVALID COMMAND>\n";
+                continue;
             }
-            else if (param == "AREA") {
-                auto it = (isMax ? std::max_element : std::min_element)(polygons.begin(), polygons.end(),
+            if (param == "AREA") {
+                auto it = std::max_element(polygons.begin(), polygons.end(),
                     [](const Polygon& a, const Polygon& b) { return calculateArea(a) < calculateArea(b); });
                 std::cout << calculateArea(*it) << '\n';
             }
             else if (param == "VERTEXES") {
-                auto it = (isMax ? std::max_element : std::min_element)(polygons.begin(), polygons.end(),
+                auto it = std::max_element(polygons.begin(), polygons.end(),
+                    [](const Polygon& a, const Polygon& b) { return a.points.size() < b.points.size(); });
+                std::cout << it->points.size() << '\n';
+            }
+            else {
+                std::cout << "<INVALID COMMAND>\n";
+            }
+        }
+        else if (command == "MIN") {
+            std::string param;
+            std::cin >> param;
+            if (polygons.empty()) {
+                std::cout << "<INVALID COMMAND>\n";
+                continue;
+            }
+            if (param == "AREA") {
+                auto it = std::min_element(polygons.begin(), polygons.end(),
+                    [](const Polygon& a, const Polygon& b) { return calculateArea(a) < calculateArea(b); });
+                std::cout << calculateArea(*it) << '\n';
+            }
+            else if (param == "VERTEXES") {
+                auto it = std::min_element(polygons.begin(), polygons.end(),
                     [](const Polygon& a, const Polygon& b) { return a.points.size() < b.points.size(); });
                 std::cout << it->points.size() << '\n';
             }
@@ -158,10 +186,16 @@ void processCommands(std::vector<Polygon>& polygons) {
                 std::cout << count << '\n';
             }
             else {
-                int n = std::stoi(param);
-                size_t count = std::count_if(polygons.begin(), polygons.end(),
-                    [n](const Polygon& p) { return p.points.size() == static_cast<size_t>(n); });
-                std::cout << count << '\n';
+                try {
+                    int n = std::stoi(param);
+                    if (n <= 0) throw std::invalid_argument("Non-positive vertex count");
+                    size_t count = std::count_if(polygons.begin(), polygons.end(),
+                        [n](const Polygon& p) { return p.points.size() == static_cast<size_t>(n); });
+                    std::cout << count << '\n';
+                }
+                catch (...) {
+                    std::cout << "<INVALID COMMAND>\n";
+                }
             }
         }
         else if (command == "RMECHO") {
@@ -170,14 +204,13 @@ void processCommands(std::vector<Polygon>& polygons) {
             Polygon target = parsePolygon(line);
             if (target.points.empty()) {
                 std::cout << "<INVALID COMMAND>\n";
+                continue;
             }
-            else {
-                size_t oldSize = polygons.size();
-                auto it = std::unique(polygons.begin(), polygons.end(),
-                    [&target](const Polygon& a, const Polygon& b) { return a == target && b == target; });
-                polygons.erase(it, polygons.end());
-                std::cout << oldSize - polygons.size() << '\n';
-            }
+            size_t oldSize = polygons.size();
+            auto equalToTarget = std::bind(std::equal_to<Polygon>(), std::placeholders::_1, target);
+            auto it = std::unique(polygons.begin(), polygons.end(), equalToTarget);
+            polygons.erase(it, polygons.end());
+            std::cout << oldSize - polygons.size() << '\n';
         }
         else if (command == "INTERSECTIONS") {
             std::string line;
@@ -185,12 +218,11 @@ void processCommands(std::vector<Polygon>& polygons) {
             Polygon target = parsePolygon(line);
             if (target.points.empty()) {
                 std::cout << "<INVALID COMMAND>\n";
+                continue;
             }
-            else {
-                size_t count = std::count_if(polygons.begin(), polygons.end(),
-                    [&target](const Polygon& p) { return doIntersect(p, target); });
-                std::cout << count << '\n';
-            }
+            auto intersectsWith = std::bind(doIntersect, std::placeholders::_1, target);
+            size_t count = std::count_if(polygons.begin(), polygons.end(), intersectsWith);
+            std::cout << count << '\n';
         }
         else {
             std::cout << "<INVALID COMMAND>\n";
