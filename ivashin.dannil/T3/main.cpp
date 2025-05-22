@@ -108,10 +108,10 @@ void processCommands(std::vector<Polygon>& polygons) {
             }
             if (param == "EVEN" || param == "ODD") {
                 bool even = param == "EVEN";
-                auto areaSum = std::bind([](const Polygon& p, bool e) {
-                    return (p.points.size() % 2 == (e ? 0 : 1)) ? calculateArea(p) : 0.0;
-                    }, std::placeholders::_1, even);
-                double sum = std::accumulate(polygons.begin(), polygons.end(), 0.0, areaSum);
+                double sum = std::accumulate(polygons.begin(), polygons.end(), 0.0,
+                    [even](double acc, const Polygon& p) {
+                        return acc + (p.points.size() % 2 == (even ? 0 : 1) ? calculateArea(p) : 0.0);
+                    });
                 std::cout << sum << '\n';
             }
             else if (param == "MEAN") {
@@ -123,10 +123,10 @@ void processCommands(std::vector<Polygon>& polygons) {
                 try {
                     int n = std::stoi(param);
                     if (n <= 0) throw std::invalid_argument("Non-positive vertex count");
-                    auto areaSum = std::bind([](const Polygon& p, size_t n) {
-                        return p.points.size() == n ? calculateArea(p) : 0.0;
-                        }, std::placeholders::_1, static_cast<size_t>(n));
-                    double sum = std::accumulate(polygons.begin(), polygons.end(), 0.0, areaSum);
+                    double sum = std::accumulate(polygons.begin(), polygons.end(), 0.0,
+                        [n](double acc, const Polygon& p) {
+                            return acc + (p.points.size() == static_cast<size_t>(n) ? calculateArea(p) : 0.0);
+                        });
                     std::cout << sum << '\n';
                 }
                 catch (...) {
