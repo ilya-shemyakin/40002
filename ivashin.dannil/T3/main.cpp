@@ -50,7 +50,10 @@ bool doIntersect(const Polygon& p1, const Polygon& p2) {
             q.y <= std::max(p.y, r.y) && q.y >= std::min(p.y, r.y);
         };
     auto orientation = [](const Point& p, const Point& q, const Point& r) {
-        int val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
+        long long val = (static_cast<long long>(q.y) - p.y) *
+            (r.x - q.x) -
+            (static_cast<long long>(q.x) - p.x) *
+            (r.y - q.y);
         return (val == 0) ? 0 : (val > 0) ? 1 : 2;
         };
     auto segmentsIntersect = [&](const Point& p1, const Point& q1,
@@ -64,6 +67,8 @@ bool doIntersect(const Polygon& p1, const Polygon& p2) {
             if (o4 == 0 && onSegment(p2, q1, q2)) return true;
             return false;
         };
+    // Проверка на совпадение полигонов
+    if (p1 == p2) return true;
     for (size_t i = 0; i < p1.points.size(); ++i) {
         for (size_t j = 0; j < p2.points.size(); ++j) {
             if (segmentsIntersect(p1.points[i],
@@ -73,6 +78,27 @@ bool doIntersect(const Polygon& p1, const Polygon& p2) {
                 return true;
             }
         }
+    }
+    // Проверка, содержится ли одна точка внутри другого полигона
+    auto isPointInside = [&](const Point& pt, const Polygon& poly) {
+        int crossings = 0;
+        for (size_t i = 0; i < poly.points.size(); ++i) {
+            Point a = poly.points[i];
+            Point b = poly.points[(i + 1) % poly.points.size()];
+            if ((a.y <= pt.y && pt.y < b.y) || (b.y <= pt.y && pt.y < a.y)) {
+                if (pt.x < (b.x - a.x) * (pt.y - a.y) / (b.y - a.y) + a.x) {
+                    crossings++;
+                }
+            }
+        }
+        return (crossings % 2) == 1;
+        };
+    // Проверяем, есть ли точка из p1 внутри p2 или наоборот
+    for (const auto& pt : p1.points) {
+        if (isPointInside(pt, p2)) return true;
+    }
+    for (const auto& pt : p2.points) {
+        if (isPointInside(pt, p1)) return true;
     }
     return false;
 }
@@ -148,12 +174,15 @@ void processCommands(std::vector<Polygon>& polygons) {
                 std::cout << sum << '\n';
             }
             else if (param == "MEAN") {
+                if (polygons.empty()) {
+                    std::cout << "<INVALID COMMAND>\n";
+                    continue;
+                }
                 double sum = std::accumulate(polygons.begin(), polygons.end(), 0.0,
                     [](double acc, const Polygon& p) {
                         return acc + calculateArea(p);
                     });
-                std::cout << (polygons.empty() ? 0.0 : sum / polygons.size())
-                    << '\n';
+                std::cout << sum / polygons.size() << '\n';
             }
             else {
                 try {
