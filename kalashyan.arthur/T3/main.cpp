@@ -90,11 +90,6 @@ int main(int argc, char* argv[]) {
         std::string cmd;
         iss >> cmd;
 
-        if (polygons.empty()) {
-            std::cout << "<INVALID COMMAND>\n";
-            continue;
-        }
-
         if (cmd == "AREA") {
             std::string arg; iss >> arg;
             std::size_t v = 0;
