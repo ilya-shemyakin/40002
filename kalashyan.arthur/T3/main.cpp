@@ -148,12 +148,14 @@ int main(int argc, char* argv[]) {
         else if (cmd == "COUNT") {
             std::string arg; iss >> arg;
             std::size_t v = 0;
-            if (arg != "EVEN" && arg != "ODD")
+            if (arg != "EVEN" && arg != "ODD") {
                 v = std::stoul(arg);
                 if (v < 3) {
                     std::cout << "<INVALID COMMAND>\n";
                     continue;
                 }
+            }
+
             int cnt = static_cast<int>(std::count_if(polygons.begin(), polygons.end(),
                 [&](auto const& p) {
                     return (arg == "EVEN" || arg == "ODD")
