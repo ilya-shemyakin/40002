@@ -39,7 +39,7 @@ bool readPolygon(const std::string& line, Polygon& poly) {
     if (std::getline(iss, rest)) {
         for (char c : rest) {
             if (!isspace(static_cast<unsigned char>(c))) {
-                return false; // есть лишние символы
+                return false;
             }
         }
     }
@@ -93,8 +93,13 @@ int main(int argc, char* argv[]) {
         if (cmd == "AREA") {
             std::string arg; iss >> arg;
             std::size_t v = 0;
-            if (arg != "EVEN" && arg != "ODD" && arg != "MEAN")
+            if (arg != "EVEN" && arg != "ODD" && arg != "MEAN") {
                 v = std::stoul(arg);
+                if (v < 3) {
+                    std::cout << "<INVALID COMMAND>\n";
+                    continue;
+                }
+            }
 
             double total = std::accumulate(polygons.begin(), polygons.end(), 0.0,
                 [&](double acc, auto const& p) {
@@ -106,10 +111,20 @@ int main(int argc, char* argv[]) {
 
             if (arg == "MEAN" && !polygons.empty()) total /= polygons.size();
 
-            std::cout << std::fixed << std::setprecision(1) << total << "\n";
+            if (polygons.empty()) {
+                std::cout << "<INVALID COMMAND>\n";
+            }
+            else {
+                std::cout << std::fixed << std::setprecision(1) << total << "\n";
+            }
         }
 
         else if (cmd == "MAX" || cmd == "MIN") {
+            if (polygons.empty()) {
+                std::cout << "<INVALID COMMAND>\n";
+                continue;
+            }
+
             std::string arg; iss >> arg;
             bool isMax = (cmd == "MAX");
 
@@ -135,6 +150,10 @@ int main(int argc, char* argv[]) {
         }
 
         else if (cmd == "COUNT") {
+            if (polygons.empty()) {
+                std::cout << "<INVALID COMMAND>\n";
+                continue;
+            }
             std::string arg; iss >> arg;
             std::size_t v = 0;
             if (arg != "EVEN" && arg != "ODD")
@@ -149,6 +168,10 @@ int main(int argc, char* argv[]) {
         }
 
         else if (cmd == "PERMS" || cmd == "MAXSEQ") {
+            if (polygons.empty()) {
+                std::cout << "<INVALID COMMAND>\n";
+                continue;
+            }
             std::string rest;
             std::getline(iss, rest);
             if (rest.empty()) {
