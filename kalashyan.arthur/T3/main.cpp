@@ -109,12 +109,13 @@ int main(int argc, char* argv[]) {
                     return take ? acc + calculateArea(p) : acc;
                 });
 
-            if (polygons.empty()) {
-                std::cout << "<INVALID COMMAND>\n";
-                continue;
+            if (arg == "MEAN") {
+                total /= polygons.size();
+                if (polygons.empty()) {
+                    std::cout << "<INVALID COMMAND>\n";
+                    continue;
+                }
             }
-            if (arg == "MEAN") total /= polygons.size();
-
             std::cout << std::fixed << std::setprecision(1) << total << "\n";
         }
 
