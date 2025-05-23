@@ -109,7 +109,8 @@ int main(int argc, char* argv[]) {
                     return take ? acc + calculateArea(p) : acc;
                 });
 
-            if (arg == "MEAN" && !polygons.empty()) total /= polygons.size();
+            if (polygons.empty()) std::cout << "<INVALID COMMAND>\n";
+            if (arg == "MEAN") total /= polygons.size();
 
             std::cout << std::fixed << std::setprecision(1) << total << "\n";
         }
@@ -149,6 +150,10 @@ int main(int argc, char* argv[]) {
             std::size_t v = 0;
             if (arg != "EVEN" && arg != "ODD")
                 v = std::stoul(arg);
+                if (v < 3) {
+                    std::cout << "<INVALID COMMAND>\n";
+                    continue;
+                }
             int cnt = static_cast<int>(std::count_if(polygons.begin(), polygons.end(),
                 [&](auto const& p) {
                     return (arg == "EVEN" || arg == "ODD")
