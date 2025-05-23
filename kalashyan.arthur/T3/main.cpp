@@ -111,12 +111,7 @@ int main(int argc, char* argv[]) {
 
             if (arg == "MEAN" && !polygons.empty()) total /= polygons.size();
 
-            if (polygons.empty()) {
-                std::cout << "<INVALID COMMAND>\n";
-            }
-            else {
-                std::cout << std::fixed << std::setprecision(1) << total << "\n";
-            }
+            std::cout << std::fixed << std::setprecision(1) << total << "\n";
         }
 
         else if (cmd == "MAX" || cmd == "MIN") {
@@ -150,10 +145,6 @@ int main(int argc, char* argv[]) {
         }
 
         else if (cmd == "COUNT") {
-            if (polygons.empty()) {
-                std::cout << "<INVALID COMMAND>\n";
-                continue;
-            }
             std::string arg; iss >> arg;
             std::size_t v = 0;
             if (arg != "EVEN" && arg != "ODD")
