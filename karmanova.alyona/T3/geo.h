@@ -51,7 +51,7 @@ struct Point
         if (x < p.x) {
             return true;
         }
-        else{
+        else {
             return (x == p.x) && (y < p.y);
         }
     }
@@ -67,7 +67,7 @@ struct Polygon
 
 
 std::istream& operator>>(std::istream& in, Point& point);
-std::ostream& operator<<(std::ostream& out,const Point& point);
+std::ostream& operator<<(std::ostream& out, const Point& point);
 std::istream& operator>>(std::istream& in, Polygon& figure);
 std::istream& operator>>(std::istream& in, DelimiterIO&& dest);
 
@@ -93,31 +93,95 @@ std::istream& operator>>(std::istream& in, Point& point) {
     {
         return in;
     }
-    in >> DelimiterIO{ '(' } >> point.x >> DelimiterIO{ ';' } >> point.y >> DelimiterIO{ ')' };
+    Point tmp;
+    in >> DelimiterIO{ '(' } >> tmp.x >> DelimiterIO{ ';' } >> tmp.y >> DelimiterIO{ ')' };
+    if (!in.fail()) {
+        point = tmp;
+    }
     return in;
 }
 
-std::ostream& operator<<(std::ostream& out,const Point& point) {
+std::ostream& operator<<(std::ostream& out, const Point& point) {
     return out << '(' << point.x << ';' << point.y << ')';
 }
 
-std::istream& operator>>(std::istream& in, Polygon& figure) {
+//std::istream& operator>>(std::istream& in, Polygon& figure) {
+//    std::istream::sentry sentry(in);
+//    if (!sentry)
+//    {
+//        return in;
+//    }
+//    int size = 0;
+//    in >> size;
+//    if (!in) {
+//        return in;
+//    }
+//    figure.points.resize(size);
+//    for (int i = 0; i < size; i++) {
+//        in >> figure.points[i];
+//        if (!in) {
+//            return in;
+//        }
+//    }
+//    //in >> std::ws; // пропускаем пробельные символы
+//
+//    if (in.peek() != std::char_traits<char>::eof()) {
+//        std::cout << "pupupu1";
+//        in >> DelimiterIO{'\n'};
+//        std::cout << "pupupu2";
+//    }
+//    if (!in) {
+//        std::cout << "pepepep3";
+//    }
+//    return in;
+//}
+
+
+std::istream& operator>>(std::istream& in, Polygon& polygon)
+{
     std::istream::sentry sentry(in);
     if (!sentry)
     {
         return in;
     }
-    int size = 0;
+    iofmtguard ifmtguard(in);
+
+    Polygon input;
+    in >> std::noskipws;
+
+    int size;
     in >> size;
-    if (!in) {
-        return in;
-    }
-    figure.points.resize(size);
-    for (int i = 0; i < size; i++) {
-        in >> figure.points[i];
-        if (!in) {
+
+    Point point;
+    for (int i = 0; i < size; ++i)
+    {
+        if (in.peek() == '\n')
+        {
+            in.setstate(std::ios::failbit);
             return in;
         }
+        in >> DelimiterIO{ ' ' };
+        if (in.peek() == '\n')
+        {
+            in.setstate(std::ios::failbit);
+            return in;
+        }
+        in >> point;
+        input.points.push_back(point);
+        if (in.fail() && !in.eof())
+        {
+            return in;
+        }
+    }
+
+    if (in.peek() != EOF)
+    {
+        in >> DelimiterIO{ '\n' };
+    }
+
+    if (in)
+    {
+        polygon = input;
     }
     return in;
 }

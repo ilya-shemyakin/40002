@@ -19,7 +19,6 @@ int main(int argc, char* argv[]) {
         std::cerr << "Failed to open file: " << argv[1] << "\n";
         return BAD_RESULT;
     }
-
     Polygon p;
     std::vector<Polygon> geoFigs;
     while (!file.eof())
