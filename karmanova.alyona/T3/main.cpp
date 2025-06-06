@@ -99,6 +99,8 @@ int main(int argc, char* argv[]) {
             iss >> p;
             if (!iss) {
                 std::cout << "<INVALID COMMAND>\n";
+                std::cin.clear();
+                std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
             }
             else {
                 int flag = checkPolygonInFrame(p, geoFigs);
@@ -124,6 +126,8 @@ int main(int argc, char* argv[]) {
             iss >> p;
             if (!iss) {
                 std::cout << "<INVALID COMMAND>\n";
+                std::cin.clear();
+                std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
             }
             else
             {
@@ -139,6 +143,8 @@ int main(int argc, char* argv[]) {
         }
         else {
             std::cout << "<INVALID COMMAND>\n";
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
         }
     }
     return 0;
