@@ -30,9 +30,9 @@ int main(int argc, char* argv[]) {
         }
     }
     file.close();
-    // std::ifstream fileCom("com.txt");
-//    std::cout << geoFigs.size();
-    std::istream& fileCom = std::cin;
+    std::ifstream fileCom("file.txt");
+    //    std::cout << geoFigs.size();
+        //std::istream& fileCom = std::cin;
     std::string command;
     double res;
     while (!fileCom.eof()) {
@@ -126,9 +126,9 @@ int main(int argc, char* argv[]) {
                 std::cout << perms(p, geoFigs) << "\n";
             }
         }
-        //    else {
-        //    std::cout << "<INVALID COMMAND>\n";
-        //}
+        else {
+            std::cout << "<INVALID COMMAND>\n";
+        }
     }
     return 0;
 }
