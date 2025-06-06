@@ -31,6 +31,7 @@ int main(int argc, char* argv[]) {
     }
     file.close();
     // std::ifstream fileCom("com.txt");
+//    std::cout << geoFigs.size();
     std::istream& fileCom = std::cin;
     std::string command;
     double res;
@@ -113,11 +114,17 @@ int main(int argc, char* argv[]) {
             Polygon p;
             iss >> p;
             if (!iss) {
-                std::cout << command << "<INVALID COMMAND>\n";
+                std::cout << "<INVALID COMMAND>\n";
                 continue;
             }
-            //std::cout << command << " ";
-            std::cout << perms(p, geoFigs) << "\n";
+            int flag = perms(p, geoFigs);
+            if (flag == BAD_RESULT) {
+                std::cout << "<INVALID COMMAND>\n";
+            }
+            else {
+                //std::cout << command << " ";
+                std::cout << perms(p, geoFigs) << "\n";
+            }
         }
         //    else {
         //    std::cout << "<INVALID COMMAND>\n";

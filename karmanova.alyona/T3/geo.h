@@ -151,7 +151,11 @@ std::istream& operator>>(std::istream& in, Polygon& polygon)
 
     int size;
     in >> size;
-
+    if (in.fail() || size < 3) // доп. защита
+    {
+        in.setstate(std::ios::failbit);
+        return in;
+    }
     Point point;
     for (int i = 0; i < size; ++i)
     {
