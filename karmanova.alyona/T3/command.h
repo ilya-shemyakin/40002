@@ -66,7 +66,6 @@ double accumulateAll(double sum, const Polygon& p, AreaCalculator& calc) {
 
 double accumulateNumber(double sum, const Polygon& p, AreaCalculator& calc, int number) {
     return (static_cast<size_t>(number) == p.points.size()) ? sum + calc(p) : sum;
-    // я ранее выъожу из фунции, если number < 0
 }
 
 bool hasCountVerticales(const Polygon& p, int count) {
