@@ -35,8 +35,7 @@ int main(int argc, char* argv[]) {
     std::istream& fileCom = std::cin;
     std::string command;
     double res;
-    while (!fileCom.eof()) {
-        fileCom >> command;
+    while (fileCom >> command) {
         res = BAD_RESULT;
         iofmtguard guard(std::cout);
         if (command == "AREA") {
