@@ -126,9 +126,9 @@ int main(int argc, char* argv[]) {
                 std::cout << perms(p, geoFigs) << "\n";
             }
         }
-        else {
-            std::cout << "<INVALID COMMAND>\n";
-        }
+        //else {
+        //    std::cout << "<INVALID COMMAND>\n";
+        //}
     }
     return 0;
 }
