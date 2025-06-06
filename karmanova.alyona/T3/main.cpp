@@ -49,6 +49,8 @@ int main(int argc, char* argv[]) {
             }
             else {
                 std::cout << "<INVALID COMMAND>\n";
+                std::cin.clear();
+                std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
             }
         }
         else if (command == "MAX") {
@@ -60,6 +62,8 @@ int main(int argc, char* argv[]) {
             }
             else {
                 std::cout << "<INVALID COMMAND>\n";
+                std::cin.clear();
+                std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
             }
         }
         else if (command == "MIN") {
@@ -71,6 +75,8 @@ int main(int argc, char* argv[]) {
             }
             else {
                 std::cout << "<INVALID COMMAND>\n";
+                std::cin.clear();
+                std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
             }
         }
         else if (command == "COUNT") {
@@ -81,6 +87,8 @@ int main(int argc, char* argv[]) {
             }
             else {
                 std::cout << "<INVALID COMMAND>\n";
+                std::cin.clear();
+                std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
             }
         }
         else if (command == "INFRAME") {
@@ -91,19 +99,20 @@ int main(int argc, char* argv[]) {
             iss >> p;
             if (!iss) {
                 std::cout << "<INVALID COMMAND>\n";
-                continue;
-            }
-            int flag = checkPolygonInFrame(p, geoFigs);
-            if (flag == BAD_RESULT) {
-                std::cout << "<INVALID COMMAND>\n";
             }
             else {
-                //    std::cout << command << " ";
-                if (flag) {
-                    std::cout << "<TRUE>" << "\n";
+                int flag = checkPolygonInFrame(p, geoFigs);
+                if (flag == BAD_RESULT) {
+                    std::cout << "<INVALID COMMAND>\n";
                 }
                 else {
-                    std::cout << "<FALSE>" << "\n";
+                    //    std::cout << command << " ";
+                    if (flag) {
+                        std::cout << "<TRUE>" << "\n";
+                    }
+                    else {
+                        std::cout << "<FALSE>" << "\n";
+                    }
                 }
             }
         }
@@ -115,20 +124,22 @@ int main(int argc, char* argv[]) {
             iss >> p;
             if (!iss) {
                 std::cout << "<INVALID COMMAND>\n";
-                continue;
             }
-            int flag = perms(p, geoFigs);
-            if (flag == BAD_RESULT) {
-                std::cout << "<INVALID COMMAND>\n";
-            }
-            else {
-                //std::cout << command << " ";
-                std::cout << perms(p, geoFigs) << "\n";
+            else
+            {
+                int flag = perms(p, geoFigs);
+                if (flag == BAD_RESULT) {
+                    std::cout << "<INVALID COMMAND>\n";
+                }
+                else {
+                    //std::cout << command << " ";
+                    std::cout << perms(p, geoFigs) << "\n";
+                }
             }
         }
-        //else {
-        //    std::cout << "<INVALID COMMAND>\n";
-        //}
+        else {
+            std::cout << "<INVALID COMMAND>\n";
+        }
     }
     return 0;
 }
