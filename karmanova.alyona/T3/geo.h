@@ -105,37 +105,6 @@ std::ostream& operator<<(std::ostream& out, const Point& point) {
     return out << '(' << point.x << ';' << point.y << ')';
 }
 
-//std::istream& operator>>(std::istream& in, Polygon& figure) {
-//    std::istream::sentry sentry(in);
-//    if (!sentry)
-//    {
-//        return in;
-//    }
-//    int size = 0;
-//    in >> size;
-//    if (!in) {
-//        return in;
-//    }
-//    figure.points.resize(size);
-//    for (int i = 0; i < size; i++) {
-//        in >> figure.points[i];
-//        if (!in) {
-//            return in;
-//        }
-//    }
-//    //in >> std::ws; // пропускаем пробельные символы
-//
-//    if (in.peek() != std::char_traits<char>::eof()) {
-//        std::cout << "pupupu1";
-//        in >> DelimiterIO{'\n'};
-//        std::cout << "pupupu2";
-//    }
-//    if (!in) {
-//        std::cout << "pepepep3";
-//    }
-//    return in;
-//}
-
 
 std::istream& operator>>(std::istream& in, Polygon& polygon)
 {
