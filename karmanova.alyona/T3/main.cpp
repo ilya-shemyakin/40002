@@ -30,9 +30,9 @@ int main(int argc, char* argv[]) {
         }
     }
     file.close();
-    std::ifstream fileCom("file.txt");
+    //std::ifstream fileCom("file.txt");
     //    std::cout << geoFigs.size();
-        //std::istream& fileCom = std::cin;
+    std::istream& fileCom = std::cin;
     std::string command;
     double res;
     while (!fileCom.eof()) {
