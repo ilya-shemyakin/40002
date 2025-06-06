@@ -66,6 +66,7 @@ double accumulateAll(double sum, const Polygon& p, AreaCalculator& calc) {
 
 double accumulateNumber(double sum, const Polygon& p, AreaCalculator& calc, int number) {
     return (static_cast<size_t>(number) == p.points.size()) ? sum + calc(p) : sum;
+    // я ранее выъожу из фунции, если number < 0
 }
 
 bool hasCountVerticales(const Polygon& p, int count) {
@@ -111,8 +112,8 @@ double Area(const std::vector<Polygon>& polygons, std::string str) {
     else {
         try {
             int number = std::stoi(str); // выкинет исключение если не выйдет
-            if (number <= 0) {
-                return 0;
+            if (number <= 2) {
+                return -1;
             }
             return std::accumulate(
                 polygons.begin(),
@@ -186,8 +187,8 @@ int countSomt(const std::vector<Polygon>& polygons, std::string str) {
     else {
         try {
             int number = std::stoi(str); // throw
-            if (number <= 0) {
-                return 0;
+            if (number <= 2) {
+                return -1;
             }
             return std::count_if(polygons.begin(), polygons.end(), std::bind(hasCountVerticales, std::placeholders::_1, number));
         }
@@ -221,49 +222,24 @@ int compareBeCoordPolygons(const Polygon& p1, const Polygon& p2, const std::stri
 }
 // тут получаю крайние точки прямоуга
 std::vector<Point> getInframePoints(const std::vector<Polygon>& polygons) {
-    auto minXPolygon = std::min_element(polygons.begin(), polygons.end(),
-        [](const Polygon& a, const Polygon& b) {
-            return compareBeCoordPolygons(a, b, "x");
-        });
-    auto minXPoint = std::min_element(minXPolygon->points.begin(),
-        minXPolygon->points.end(),
-        [](const Point& a, const Point& b) {
-            return compareBeCoordPoint(a, b, "x");
+    std::vector<Point> allPoints;
+    std::for_each(polygons.begin(), polygons.end(), [&allPoints](const Polygon& poly) {
+        allPoints.insert(allPoints.end(), poly.points.begin(), poly.points.end());
         });
 
-    auto minYPolygon = std::min_element(polygons.begin(), polygons.end(),
-        [](const Polygon& a, const Polygon& b) {
-            return compareBeCoordPolygons(a, b, "y");
-        });
-    auto minYPoint = std::min_element(minYPolygon->points.begin(),
-        minYPolygon->points.end(),
-        [](const Point& a, const Point& b) {
-            return compareBeCoordPoint(a, b, "y");
-        });
+    auto minX = std::min_element(allPoints.begin(), allPoints.end(),
+        [](const Point& a, const Point& b) { return a.x < b.x; });
+    auto maxX = std::max_element(allPoints.begin(), allPoints.end(),
+        [](const Point& a, const Point& b) { return a.x < b.x; });
 
-    auto maxYPolygon = std::max_element(polygons.begin(), polygons.end(),
-        [](const Polygon& a, const Polygon& b) {
-            return compareBeCoordPolygons(a, b, "y");
-        });
-    auto maxYPoint = std::max_element(maxYPolygon->points.begin(),
-        maxYPolygon->points.end(),
-        [](const Point& a, const Point& b) {
-            return compareBeCoordPoint(a, b, "y");
-        });
-
-    auto maxXPolygon = std::max_element(polygons.begin(), polygons.end(),
-        [](const Polygon& a, const Polygon& b) {
-            return compareBeCoordPolygons(a, b, "x");
-        });
-    auto maxXPoint = std::max_element(maxXPolygon->points.begin(),
-        maxXPolygon->points.end(),
-        [](const Point& a, const Point& b) {
-            return compareBeCoordPoint(a, b, "x");
-        });
+    auto minY = std::min_element(allPoints.begin(), allPoints.end(),
+        [](const Point& a, const Point& b) { return a.y < b.y; });
+    auto maxY = std::max_element(allPoints.begin(), allPoints.end(),
+        [](const Point& a, const Point& b) { return a.y < b.y; });
 
     std::vector<Point> vFrame;
-    vFrame.push_back(Point(minXPoint->x, minYPoint->y));
-    vFrame.push_back(Point(maxXPoint->x, maxYPoint->y));
+    vFrame.push_back(Point(minX->x, minY->y));  // нижний левый угол
+    vFrame.push_back(Point(maxX->x, maxY->y));  // верхний правый угол
     return vFrame;
 }
 
@@ -274,15 +250,15 @@ bool isPointInFrame(const Point& p, const std::vector<Point>& v) {
 // тут мне нужна - фигура искомая и результат getInFrame
 // передать надо мой вектор, чтобы получить прямоуг и искомую фигуру
 int checkPolygonInFrame(const Polygon& p, const std::vector<Polygon>& vPoly) {
-    if (vPoly.empty()) {
+    if (vPoly.empty() || p.points.size() <= 2) {
         return -1;
     }
     std::vector<Point> vFrame = getInframePoints(vPoly);
-    /*std::cout << "\nграницы: ";
-    for (const Point& p : vFrame) {
-        std::cout << p << " ";
-    }*/
-    std::cout << std::endl;
+    /* std::cout << "\nграницы: ";
+     for (const Point& p : vFrame) {
+         std::cout << p << " ";
+     }
+     std::cout << std::endl;*/
     int cnt = std::count_if(p.points.begin(), p.points.end(),
         std::bind(isPointInFrame, std::placeholders::_1, vFrame));
     return cnt == static_cast<int>(p.points.size());
@@ -290,6 +266,9 @@ int checkPolygonInFrame(const Polygon& p, const std::vector<Polygon>& vPoly) {
 
 
 int perms(const Polygon& poly, const std::vector<Polygon>& vPoly) {
+    if (poly.points.size() <= 2) {
+        return -1;
+    }
     return std::count_if(vPoly.begin(), vPoly.end(),
         PolygonEqual(poly));
 }
