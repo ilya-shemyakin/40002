@@ -47,7 +47,6 @@ void area(const std::vector< Polygon >& shapes, std::istream& in, std::ostream& 
     {
         if (shapes.size() > 0)
         {
-            size_t temp = 2;
             out << std::accumulate(shapes.cbegin(), shapes.cend(), 0.0, getSumArea)
                 / shapes.size();
         }
