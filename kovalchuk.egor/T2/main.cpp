@@ -1,5 +1,5 @@
 ﻿#include "DataStruct.h"
-
+//2
 int main()
 {
     using dStruct::DataStruct;
