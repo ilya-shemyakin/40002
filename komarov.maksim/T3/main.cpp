@@ -30,13 +30,14 @@ int main(int argc,char* argv[])
     std::string c;
     while(std::cin>>c)
     {
-        try{
+        try {
             if(cmd.count(c)==0) throw std::runtime_error("bad");
             cmd[c](std::cin,std::cout); std::cout<<'\n';
-        }catch(...){
-            std::cout<<"<INVALID COMMAND>\n";
+        } catch(...) {
+            std::cout << "<INVALID COMMAND>\n";
             std::cin.clear();
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
+            std::string trash;
+            std::getline(std::cin, trash);
         }
     }
     return 0;
