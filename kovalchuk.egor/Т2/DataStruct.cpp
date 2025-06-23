@@ -1,5 +1,5 @@
 ﻿#include "DataStruct.h"
-
+//1231guaefuy
 namespace dStruct
 {
     std::istream& operator>>(std::istream& in, DelimiterIO&& dest)
