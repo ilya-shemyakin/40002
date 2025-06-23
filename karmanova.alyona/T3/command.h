@@ -93,7 +93,7 @@ double Area(const std::vector<Polygon>& polygons, std::string str) {
             0.0,
             std::bind(accumulateOddAreas, std::placeholders::_1,
             std::placeholders::_2, std::ref(calc))
-        ); // передаем соответсвенно накопленную сумму (которая с 0 шла) и текущий элемент
+        );
     }
     else if (str == "MEAN") {
         if (polygons.size() > 0) {
@@ -111,7 +111,7 @@ double Area(const std::vector<Polygon>& polygons, std::string str) {
     }
     else {
         try {
-            int number = std::stoi(str); // выкинет исключение если не выйдет
+            int number = std::stoi(str);
             if (number <= 2) {
                 return -1;
             }
