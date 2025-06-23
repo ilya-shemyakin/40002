@@ -38,19 +38,19 @@ void area(const std::vector< Polygon >& shapes, std::istream& in, std::ostream& 
     if (param == "EVEN")
     {
         out << std::accumulate(shapes.cbegin(), shapes.cend(), 0.0,
-            std::bind(getSumArea, 0, std::placeholders::_1, std::placeholders::_2));
+            std::bind(getSumArea, static_cast<size_t>(0), std::placeholders::_1, std::placeholders::_2));
     }
     else if (param == "ODD")
     {
         out << std::accumulate(shapes.cbegin(), shapes.cend(), 0.0,
-            std::bind(getSumArea, 1, std::placeholders::_1, std::placeholders::_2));
+            std::bind(getSumArea, static_cast<size_t>(1), std::placeholders::_1, std::placeholders::_2));
     }
     else if (param == "MEAN")
     {
         if (shapes.size() > 0)
         {
             out << std::accumulate(shapes.cbegin(), shapes.cend(), 0.0,
-                std::bind(getSumArea, 2, std::placeholders::_1, std::placeholders::_2))
+                std::bind(getSumArea, static_cast<size_t>(2), std::placeholders::_1, std::placeholders::_2))
                 / shapes.size();
         }
         else
@@ -75,7 +75,7 @@ void area(const std::vector< Polygon >& shapes, std::istream& in, std::ostream& 
         out << std::accumulate
         (
             shapes.cbegin(), shapes.cend(), 0.0,
-            std::bind(getSumArea, vertexes, std::placeholders::_1, std::placeholders::_2)
+            std::bind(getSumArea, static_cast<size_t>(vertexes), std::placeholders::_1, std::placeholders::_2)
         );
     }
 }
@@ -208,12 +208,12 @@ void count(const std::vector< Polygon >& shapes, std::istream& in, std::ostream&
     if (param == "EVEN")
     {
         out << std::count_if(shapes.begin(), shapes.end(),
-            std::bind(isVertexes, 0, std::placeholders::_1));
+            std::bind(isVertexes, static_cast<size_t>(0), std::placeholders::_1));
     }
     else if (param == "ODD")
     {
         out << std::count_if(shapes.begin(), shapes.end(),
-            std::bind(isVertexes, 1, std::placeholders::_1));
+            std::bind(isVertexes, static_cast<size_t>(1), std::placeholders::_1));
     }
     else
     {
@@ -230,7 +230,7 @@ void count(const std::vector< Polygon >& shapes, std::istream& in, std::ostream&
         }
 
         out << std::count_if(shapes.begin(), shapes.end(),
-            std::bind(isVertexes, vertexes, std::placeholders::_1));
+            std::bind(isVertexes, static_cast<size_t>(vertexes), std::placeholders::_1));
     }
 }
 
