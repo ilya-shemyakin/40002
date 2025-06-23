@@ -1,5 +1,4 @@
 ﻿#include "DataStruct.h"
-//123123
 
 namespace dStruct
 {
