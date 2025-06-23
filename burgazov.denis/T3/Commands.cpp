@@ -254,17 +254,17 @@ void inframe(const std::vector< Polygon >& shapes, std::istream& in, std::ostrea
     std::vector<int> maxYVector(shapes.size());
 
 
-    int minX = std::numeric_limits<int>::min();
-    int maxX = std::numeric_limits<int>::max();
-    int minY = std::numeric_limits<int>::min();
-    int maxY = std::numeric_limits<int>::max();
+    int minX = std::numeric_limits<int>::max();
+    int maxX = std::numeric_limits<int>::min();
+    int minY = std::numeric_limits<int>::max();
+    int maxY = std::numeric_limits<int>::min();
     std::for_each(shapes.begin(), shapes.end(),
         std::bind(getFrame, minX, maxX, minY, maxY, std::placeholders::_1));
 
-    int minXOfPolygon = std::numeric_limits<int>::min();
-    int maxXOfPolygon = std::numeric_limits<int>::max();
-    int minYOfPolygon = std::numeric_limits<int>::min();
-    int maxYOfPolygon = std::numeric_limits<int>::max();
+    int minXOfPolygon = std::numeric_limits<int>::max();
+    int maxXOfPolygon = std::numeric_limits<int>::min();
+    int minYOfPolygon = std::numeric_limits<int>::max();
+    int maxYOfPolygon = std::numeric_limits<int>::min();
     getFrame(minXOfPolygon, maxXOfPolygon, minYOfPolygon, maxYOfPolygon, polygon);
 
     if (minXOfPolygon >= minX && minYOfPolygon >= minY && maxXOfPolygon <= maxX && maxYOfPolygon <= maxY)
@@ -290,7 +290,7 @@ void echo(std::vector< Polygon >& shapes, std::istream& in, std::ostream& out) {
     std::vector < Polygon > newShapes;
     int countOfDublicate = 0;
     std::for_each(shapes.begin(), shapes.end(),
-        std::bind(subEcho, std::placeholders::_1, polygon, newShapes, countOfDublicate));
+        std::bind(subEcho, std::placeholders::_1, std::cref(polygon), std::ref(newShapes), std::ref(countOfDublicate)));
     shapes = newShapes;
 
     out << countOfDublicate;
