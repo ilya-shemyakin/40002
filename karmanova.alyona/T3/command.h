@@ -45,8 +45,6 @@ struct PolygonEqual {
             });
 
         return curSet == set_;
-        // соответсвенно если в одном (1;3), а в другом (1;3) (3;1) то это будет выглядеть как
-        // (1;3) и (1;3) (1;3) - не сравняется, все ок
     }
 private:
     std::multiset<std::pair<int, int>> set_;
@@ -84,7 +82,7 @@ double Area(const std::vector<Polygon>& polygons, std::string str) {
             polygons.begin(),
             polygons.end(),
             0.0,
-            std::bind(accumulateEvenAreas, std::placeholders::_1, 
+            std::bind(accumulateEvenAreas, std::placeholders::_1,
                 std::placeholders::_2, std::ref(calc))
         );
     }
@@ -93,9 +91,9 @@ double Area(const std::vector<Polygon>& polygons, std::string str) {
             polygons.begin(),
             polygons.end(),
             0.0,
-            std::bind(accumulateOddAreas, std::placeholders::_1, 
+            std::bind(accumulateOddAreas, std::placeholders::_1,
                 std::placeholders::_2, std::ref(calc))
-        ); // передаем соответсвенно накопленную сумму (которая с 0 шла) и текущий элемент
+        );
     }
     else if (str == "MEAN") {
         if (polygons.size() > 0) {
@@ -103,7 +101,7 @@ double Area(const std::vector<Polygon>& polygons, std::string str) {
                 polygons.begin(),
                 polygons.end(),
                 0.0,
-                std::bind(accumulateAll, std::placeholders::_1, 
+                std::bind(accumulateAll, std::placeholders::_1,
                     std::placeholders::_2, std::ref(calc))
             ) / polygons.size();
         }
@@ -113,7 +111,7 @@ double Area(const std::vector<Polygon>& polygons, std::string str) {
     }
     else {
         try {
-            int number = std::stoi(str); // выкинет исключение если не выйдет
+            int number = std::stoi(str);
             if (number <= 2) {
                 return -1;
             }
@@ -121,7 +119,7 @@ double Area(const std::vector<Polygon>& polygons, std::string str) {
                 polygons.begin(),
                 polygons.end(),
                 0.0,
-                std::bind(accumulateNumber, std::placeholders::_1, 
+                std::bind(accumulateNumber, std::placeholders::_1,
                     std::placeholders::_2, std::ref(calc), number)
             );
         }
@@ -144,7 +142,7 @@ double maxSometh(const std::vector<Polygon>& polygons, std::string& str) {
         if (str == "AREA") {
             AreaCalculator calc;
             auto maxPolygon = std::max_element(polygons.begin(), polygons.end(),
-                std::bind(compareByArea, std::placeholders::_1, 
+                std::bind(compareByArea, std::placeholders::_1,
                     std::placeholders::_2, std::ref(calc)));
             return calc(*maxPolygon);
         }
@@ -160,11 +158,13 @@ double minSometh(const std::vector<Polygon>& polygons, std::string& str) {
     if (polygons.size() > 0) {
         if (str == "AREA") {
             auto minPolygon = std::min_element(polygons.begin(), polygons.end(),
-                std::bind(compareByArea, std::placeholders::_1, std::placeholders::_2, std::ref(calc)));
+                std::bind(compareByArea, std::placeholders::_1,
+                    std::placeholders::_2, std::ref(calc)));
             return calc(*minPolygon);
         }
         if (str == "VERTEXES") {
-            auto minPolygon = std::min_element(polygons.begin(), polygons.end(), compareByVeg);
+            auto minPolygon = std::min_element(polygons.begin(),
+                polygons.end(), compareByVeg);
             return minPolygon->points.size();
         }
     }
@@ -176,7 +176,8 @@ int countSomt(const std::vector<Polygon>& polygons, std::string str) {
         return std::count_if(polygons.begin(), polygons.end(), hasEvenCountPoints);
     }
     else if (str == "ODD") {
-        return polygons.size() - std::count_if(polygons.begin(), polygons.end(), hasEvenCountPoints);
+        return polygons.size() - std::count_if(polygons.begin(),
+            polygons.end(), hasEvenCountPoints);
     }
     else {
         try {
@@ -184,7 +185,7 @@ int countSomt(const std::vector<Polygon>& polygons, std::string str) {
             if (number <= 2) {
                 return -1;
             }
-            return std::count_if(polygons.begin(), polygons.end(), 
+            return std::count_if(polygons.begin(), polygons.end(),
                 std::bind(hasCountVerticales, std::placeholders::_1, number));
         }
         catch (std::exception& e) {
@@ -237,7 +238,6 @@ int checkPolygonInFrame(const Polygon& p, const std::vector<Polygon>& vPoly) {
         std::bind(isPointInFrame, std::placeholders::_1, vFrame));
     return cnt == static_cast<int>(p.points.size());
 }
-
 
 int perms(const Polygon& poly, const std::vector<Polygon>& vPoly) {
     if (poly.points.size() <= 2) {

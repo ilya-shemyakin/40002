@@ -23,7 +23,8 @@ int main(int argc, char* argv[]) {
     std::vector<Polygon> geoFigs;
     while (!file.eof())
     {
-        std::copy(std::istream_iterator<Polygon>(file), std::istream_iterator<Polygon>(), std::back_inserter(geoFigs));
+        std::copy(std::istream_iterator<Polygon>(file), std::istream_iterator<Polygon>(),
+            std::back_inserter(geoFigs));
         if (!file) {
             file.clear();
             file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
