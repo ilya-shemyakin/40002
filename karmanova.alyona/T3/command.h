@@ -84,7 +84,8 @@ double Area(const std::vector<Polygon>& polygons, std::string str) {
             polygons.begin(),
             polygons.end(),
             0.0,
-            std::bind(accumulateEvenAreas, std::placeholders::_1, std::placeholders::_2, std::ref(calc))
+            std::bind(accumulateEvenAreas, std::placeholders::_1, 
+                std::placeholders::_2, std::ref(calc))
         );
     }
     else if (str == "ODD") {
@@ -92,7 +93,8 @@ double Area(const std::vector<Polygon>& polygons, std::string str) {
             polygons.begin(),
             polygons.end(),
             0.0,
-            std::bind(accumulateOddAreas, std::placeholders::_1, std::placeholders::_2, std::ref(calc))
+            std::bind(accumulateOddAreas, std::placeholders::_1, 
+                std::placeholders::_2, std::ref(calc))
         ); // передаем соответсвенно накопленную сумму (которая с 0 шла) и текущий элемент
     }
     else if (str == "MEAN") {
@@ -101,7 +103,8 @@ double Area(const std::vector<Polygon>& polygons, std::string str) {
                 polygons.begin(),
                 polygons.end(),
                 0.0,
-                std::bind(accumulateAll, std::placeholders::_1, std::placeholders::_2, std::ref(calc))
+                std::bind(accumulateAll, std::placeholders::_1, 
+                    std::placeholders::_2, std::ref(calc))
             ) / polygons.size();
         }
         else {
@@ -118,7 +121,8 @@ double Area(const std::vector<Polygon>& polygons, std::string str) {
                 polygons.begin(),
                 polygons.end(),
                 0.0,
-                std::bind(accumulateNumber, std::placeholders::_1, std::placeholders::_2, std::ref(calc), number)
+                std::bind(accumulateNumber, std::placeholders::_1, 
+                    std::placeholders::_2, std::ref(calc), number)
             );
         }
         catch (std::exception& e) {
@@ -140,7 +144,8 @@ double maxSometh(const std::vector<Polygon>& polygons, std::string& str) {
         if (str == "AREA") {
             AreaCalculator calc;
             auto maxPolygon = std::max_element(polygons.begin(), polygons.end(),
-                std::bind(compareByArea, std::placeholders::_1, std::placeholders::_2, std::ref(calc)));
+                std::bind(compareByArea, std::placeholders::_1, 
+                    std::placeholders::_2, std::ref(calc)));
             return calc(*maxPolygon);
         }
         if (str == "VERTEXES") {
@@ -179,7 +184,8 @@ int countSomt(const std::vector<Polygon>& polygons, std::string str) {
             if (number <= 2) {
                 return -1;
             }
-            return std::count_if(polygons.begin(), polygons.end(), std::bind(hasCountVerticales, std::placeholders::_1, number));
+            return std::count_if(polygons.begin(), polygons.end(), 
+                std::bind(hasCountVerticales, std::placeholders::_1, number));
         }
         catch (std::exception& e) {
             return -1;
