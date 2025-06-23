@@ -34,16 +34,6 @@ double calculateArea(const Polygon& poly) {
     return std::abs(area) / 2.0;
 }
 
-bool isSameShape(const Polygon& p1, const Polygon& p2) {
-    if (p1.points.size() != p2.points.size()) return false;
-    std::vector<Point> v1 = p1.points, v2 = p2.points;
-    for (size_t i = 0; i < v1.size(); ++i) {
-        if (std::equal(v1.begin(), v1.end(), v2.begin())) return true;
-        std::rotate(v1.begin(), v1.begin() + 1, v1.end());
-    }
-    return false;
-}
-
 bool doIntersect(const Polygon& p1, const Polygon& p2) {
     auto onSegment = [](const Point& p, const Point& q, const Point& r) {
         return q.x <= std::max(p.x, r.x) && q.x >= std::min(p.x, r.x) &&
@@ -133,7 +123,6 @@ std::vector<Polygon> readPolygons(const std::string& filename) {
         Polygon poly = parsePolygon(line);
         if (!poly.points.empty()) polygons.push_back(poly);
     }
-
     return polygons;
 }
 
