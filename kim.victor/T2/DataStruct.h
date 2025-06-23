@@ -1,6 +1,4 @@
-﻿#pragma once
-
-#ifndef DATASTRUCT_H
+﻿#ifndef DATASTRUCT_H
 #define DATASTRUCT_H
 
 #include <iostream>
@@ -75,4 +73,4 @@ namespace dStruct
     std::ostream& operator<<(std::ostream& out, const DataStruct& dest);
 }
 
-#endif !DATASTRUCT_H
+#endif // DATASTRUCT_H //
