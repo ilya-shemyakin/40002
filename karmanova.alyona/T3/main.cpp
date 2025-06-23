@@ -23,8 +23,7 @@ int main(int argc, char* argv[]) {
     std::vector<Polygon> geoFigs;
     while (!file.eof())
     {
-        std::copy(std::istream_iterator<Polygon>(file), std::istream_iterator<Polygon>(),
-            std::back_inserter(geoFigs));
+        std::copy(std::istream_iterator<Polygon>(file), std::istream_iterator<Polygon>(), std::back_inserter(geoFigs));
         if (!file) {
             file.clear();
             file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -35,15 +34,12 @@ int main(int argc, char* argv[]) {
     std::string command;
     double res;
     while (fileCom >> command) {
-
         res = BAD_RESULT;
         iofmtguard guard(std::cout);
         if (command == "AREA") {
-            iofmtguard guard(std::cout);
             fileCom >> command;
             res = Area(geoFigs, command);
             if (res != BAD_RESULT) {
-                // std::cout << "AREA (delete this message) " << command << " " << "\n";
                 std::cout << std::fixed << std::setprecision(1) << res << "\n";
             }
             else {
