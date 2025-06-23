@@ -93,3 +93,4 @@ void intersectionsCmd(const PolyVec& f,std::istream& in,std::ostream& out)
         [&](const Polygon& p){ return intersects(p, poly); });
 }
 }
+

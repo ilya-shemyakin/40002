@@ -110,3 +110,4 @@ inline bool parsePolygon(const std::string& line, Polygon& out)
 }
 }
 #endif
+
