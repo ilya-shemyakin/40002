@@ -81,16 +81,26 @@ void rects(const PolyVec& f,std::istream&,std::ostream& o)
     o<<std::count_if(f.begin(), f.end(), [](const Polygon& p){ return p.isRectangle(); });
 }
 
-void intersectionsCmd(const PolyVec& f,std::istream& in,std::ostream& out)
+void intersectionsCmd(const PolyVec& f, std::istream& in, std::ostream& out)
 {
-    std::string rest; std::getline(in, rest);
-    if(rest.empty() || rest[0]!=' ') throw std::runtime_error("poly");
-    rest.erase(0,1);
+    if (in.peek() != ' ')
+        throw std::runtime_error("poly");
+    in.get();
+
+    std::string rest;
+    std::getline(in, rest);
+
     Polygon poly;
-    if(!parsePolygon(rest, poly) || poly.points.size() < 3)
+    if (!parsePolygon(rest, poly) || poly.points.size() < 3)
+    {
+        in.putback('\n');
         throw std::runtime_error("parse");
-    out<<std::count_if(f.begin(), f.end(),
-        [&](const Polygon& p){ return intersects(p, poly); });
+    }
+
+    auto cnt = std::count_if(f.begin(), f.end(),
+                 [&](const Polygon& p){ return intersects(p, poly); });
+    out << cnt;
 }
 }
+
 
