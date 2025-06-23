@@ -14,3 +14,4 @@ private:
     std::basic_ios<char>::fmtflags      fl_;
 };
 #endif
+

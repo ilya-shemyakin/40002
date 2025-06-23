@@ -16,3 +16,4 @@ namespace max
     void intersectionsCmd(const PolyVec&,std::istream&,std::ostream&);
 }
 #endif
+

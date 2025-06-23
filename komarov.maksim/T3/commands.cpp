@@ -83,3 +83,4 @@ void intersectionsCmd(const PolyVec& f,std::istream& in,std::ostream& out)
     out<<std::count_if(f.begin(),f.end(),[&](const Polygon& p){return intersects(p,poly);});
 }
 }
+
