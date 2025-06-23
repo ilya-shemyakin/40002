@@ -1,6 +1,6 @@
 ﻿#ifndef DATASTRUCT_H
 #define DATASTRUCT_H
-//123123123
+//1231
 #include <iostream>
 #include <vector>
 #include <algorithm>
