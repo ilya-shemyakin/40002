@@ -259,7 +259,7 @@ void inframe(const std::vector< Polygon >& shapes, std::istream& in, std::ostrea
     int minY = std::numeric_limits<int>::max();
     int maxY = std::numeric_limits<int>::min();
     std::for_each(shapes.begin(), shapes.end(),
-        std::bind(getFrame, minX, maxX, minY, maxY, std::placeholders::_1));
+        std::bind(getFrame, std::ref(minX), std::ref(maxX), std::ref(minY), std::ref(maxY), std::placeholders::_1));
 
     int minXOfPolygon = std::numeric_limits<int>::max();
     int maxXOfPolygon = std::numeric_limits<int>::min();
