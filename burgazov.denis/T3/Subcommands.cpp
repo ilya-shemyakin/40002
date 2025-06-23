@@ -24,36 +24,33 @@ double getPolygonArea(const Polygon& polygon)
     return std::accumulate(triangleAreas.cbegin(), triangleAreas.cend(), 0.0);
 }
 
-//double getAreaOfEven(double areaSum, const Polygon& polygon)
-//{
-//    if (polygon.points.size() % 2 == 0)
-//    {
-//        return areaSum + getPolygonArea(polygon);
-//    }
-//    return areaSum;
-//}
-//
-//double getAreaOfOdd(double areaSum, const Polygon& polygon)
-//{
-//    if (polygon.points.size() % 2 != 0)
-//    {
-//        return areaSum + getPolygonArea(polygon);
-//    }
-//    return areaSum;
-//}
-
-double getSumArea(size_t flag, double areaSum, const Polygon& polygon)
+double getAreaOfEven(double areaSum, const Polygon& polygon)
 {
-    if (flag == 2) {
+    if (polygon.points.size() % 2 == 0)
+    {
         return areaSum + getPolygonArea(polygon);
     }
-    else if (flag < 2 && polygon.points.size() % 2 == flag) {
+    return areaSum;
+}
+
+double getAreaOfOdd(double areaSum, const Polygon& polygon)
+{
+    if (polygon.points.size() % 2 != 0)
+    {
         return areaSum + getPolygonArea(polygon);
     }
-    else if (flag < 2) {
-        return areaSum;
-    }
-    else if (polygon.points.size() == flag) {
+    return areaSum;
+}
+
+double getSumArea(double areaSum, const Polygon& polygon)
+{
+    return areaSum + getPolygonArea(polygon);
+}
+
+double getVertexesArea(double areaSum, const Polygon& polygon, const unsigned countOfVertexes)
+{
+    if (polygon.points.size() == countOfVertexes)
+    {
         return areaSum + getPolygonArea(polygon);
     }
     return areaSum;
@@ -75,23 +72,17 @@ double getMinVertexes(const size_t vertexes, const Polygon& polygon) {
     return std::min(vertexes, polygon.points.size());
 }
 
-//bool isEven(const Polygon& polygon)
-//{
-//    return polygon.points.size() % 2 == 0;
-//}
-//
-//bool isOdd(const Polygon& polygon)
-//{
-//    return polygon.points.size() % 2 != 0;
-//}
-bool isVertexes(size_t flag, const Polygon& polygon) {
-    if (flag < 2) {
-        return polygon.points.size() % 2 == flag;
-    }
-    else if (flag > 2) {
-        return polygon.points.size() == flag;
-    }
-    return flag;
+bool isEven(const Polygon& polygon)
+{
+    return polygon.points.size() % 2 == 0;
+}
+
+bool isOdd(const Polygon& polygon)
+{
+    return polygon.points.size() % 2 != 0;
+}
+bool isVertexes(const Polygon& polygon, const unsigned countOfVertexes) {
+    return polygon.points.size() == countOfVertexes;
 }
 
 bool comparatorX(const Point& left, const Point& right)
