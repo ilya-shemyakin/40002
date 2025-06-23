@@ -1,0 +1,296 @@
+#include <string>
+#include <iomanip>
+#include <numeric>
+#include <iterator>
+#include <algorithm>
+#include <functional>
+
+#include "Fmtguard.h"
+#include "Commands.h"
+
+void area(const std::vector< Polygon >& shapes, std::istream& in, std::ostream& out)
+{
+    /*if (in.peek() == '\n')
+    {
+        throw std::invalid_argument("ERROR: Missing parameters");
+    }*/
+
+    iofmtguard ifmtguard(in);
+    in >> std::noskipws;
+
+    if (!(in >> DelimiterIO{ ' ' }))
+    {
+        throw std::invalid_argument("ERROR: Missing parameters");
+    }
+
+    std::string param = "";
+    in >> param;
+
+    if (in.peek() != '\n')
+    {
+        throw std::invalid_argument("ERROR: Wrong line");
+    }
+
+    iofmtguard ofmtguard(out);
+    out << std::fixed << std::setprecision(1);
+
+    if (param == "EVEN")
+    {
+        out << std::accumulate(shapes.cbegin(), shapes.cend(), 0.0, 
+                                std::bind(getSumArea, 0, std::placeholders::_1, std::placeholders::_2));
+    }
+    else if (param == "ODD")
+    {
+        out << std::accumulate(shapes.cbegin(), shapes.cend(), 0.0,
+            std::bind(getSumArea, 1, std::placeholders::_1, std::placeholders::_2));
+    }
+    else if (param == "MEAN")
+    {
+        if (shapes.size() > 0)
+        {
+            out << std::accumulate (shapes.cbegin(), shapes.cend(), 0.0,
+                                    std::bind(getSumArea, 2, std::placeholders::_1, std::placeholders::_2))
+                / shapes.size();
+        }
+        else
+        {
+            throw std::invalid_argument("ERROR: No enough shapes");
+        }
+    }
+    else
+    {
+        int vertexes = 0;
+        try {
+            vertexes = std::stoi(param);
+        }
+        catch (...) {
+            throw std::invalid_argument("ERROR: Invalid parameters");
+        }
+
+        if (vertexes < 3) {
+            throw std::invalid_argument("ERROR: Invalid parameters");
+        }
+
+        out << std::accumulate
+        (
+            shapes.cbegin(), shapes.cend(), 0.0,
+            std::bind(getSumArea, vertexes, std::placeholders::_1, std::placeholders::_2)
+        );
+    }
+}
+
+void max(const std::vector< Polygon >& shapes, std::istream& in, std::ostream& out)
+{
+    if (shapes.size() == 0)
+    {
+        throw std::invalid_argument("ERROR: No enough shapes");
+    }
+
+    /*if (in.peek() == '\n')
+    {
+        throw std::invalid_argument("No param");
+    }
+
+    iofmtguard ifmtguard(in);
+    in >> std::noskipws;
+
+    std::string param = "";
+
+    in >> DelimiterIO{ ' ' } >> param;*/
+
+    iofmtguard ifmtguard(in);
+    in >> std::noskipws;
+
+    if (!(in >> DelimiterIO{ ' ' }))
+    {
+        throw std::invalid_argument("ERROR: Missing parameters");
+    }
+
+    std::string param = "";
+    in >> param;
+
+    if (in.peek() != '\n')
+    {
+        throw std::invalid_argument("ERROR: Wrong line");
+    }
+
+    iofmtguard ofmtguard(out);
+    out << std::fixed << std::setprecision(1);
+
+    if (param == "AREA")
+    {
+        out << std::accumulate(shapes.cbegin(), shapes.cend(), getPolygonArea(shapes[0]), getMaxArea);
+    }
+    else if (param == "VERTEXES")
+    {
+        out << std::accumulate(shapes.cbegin(), shapes.cend(), shapes[0].points.size(), getMaxVertexes);
+    }
+    else
+    {
+        throw std::invalid_argument("ERROR: Invalid parameters");
+    }
+}
+
+void min(const std::vector< Polygon >& shapes, std::istream& in, std::ostream& out)
+{
+    if (shapes.size() == 0)
+    {
+        throw std::invalid_argument("ERROR: No enough shapes");
+    }
+
+    /*if (in.peek() == '\n')
+    {
+        throw std::invalid_argument("No param");
+    }
+
+    iofmtguard ifmtguard(in);
+    in >> std::noskipws;
+
+    std::string param = "";
+
+    in >> DelimiterIO{ ' ' } >> param;*/
+
+    iofmtguard ifmtguard(in);
+    in >> std::noskipws;
+
+    if (!(in >> DelimiterIO{ ' ' }))
+    {
+        throw std::invalid_argument("ERROR: Missing parameters");
+    }
+
+    std::string param = "";
+    in >> param;
+
+    if (in.peek() != '\n')
+    {
+        throw std::invalid_argument("ERROR: Wrong line");
+    }
+
+    iofmtguard ofmtguard(out);
+    out << std::fixed << std::setprecision(1);
+
+    if (param == "AREA")
+    {
+        out << std::accumulate(shapes.cbegin(), shapes.cend(), getPolygonArea(shapes[0]), getMinArea);
+    }
+    else if (param == "VERTEXES")
+    {
+        out << std::accumulate(shapes.cbegin(), shapes.cend(), shapes[0].points.size(), getMinVertexes);
+    }
+    else
+    {
+        throw std::invalid_argument("ERROR: Invalid parameters");
+    }
+}
+
+void count(const std::vector< Polygon >& shapes, std::istream& in, std::ostream& out)
+{
+    iofmtguard ifmtguard(in);
+    in >> std::noskipws;
+
+    if (!(in >> DelimiterIO{ ' ' }))
+    {
+        throw std::invalid_argument("ERROR: Missing parameters");
+    }
+
+    std::string param = "";
+    in >> param;
+
+    if (in.peek() != '\n')
+    {
+        throw std::invalid_argument("Wrong line");
+    }
+
+    iofmtguard ofmtguard(out);
+    out << std::fixed << std::setprecision(1);
+
+    if (param == "EVEN")
+    {
+        out << std::count_if(shapes.begin(), shapes.end(),
+                            std::bind(isVertexes, 0, std::placeholders::_1));
+    }
+    else if (param == "ODD")
+    {
+        out << std::count_if(shapes.begin(), shapes.end(),
+                            std::bind(isVertexes, 1, std::placeholders::_1));
+    }
+    else
+    {
+        int vertexes = 0;
+        try {
+            vertexes = std::stoi(param);
+        }
+        catch (...) {
+            throw std::invalid_argument("ERROR: Invalid parameters");
+        }
+
+        if (vertexes < 3) {
+            throw std::invalid_argument("ERROR: Invalid parameters");
+        }
+
+        out << std::count_if(shapes.begin(), shapes.end(), 
+                            std::bind(isVertexes, vertexes, std::placeholders::_1));
+    }
+}
+
+void inframe(const std::vector< Polygon >& shapes, std::istream& in, std::ostream& out)
+{
+    std::string answer = "<FALSE>";
+
+    iofmtguard ifmtguard(in);
+    in >> std::noskipws;
+
+    Polygon polygon;
+    in >> DelimiterIO{ ' ' } >> polygon;
+
+    if (in.fail() && !in.eof())
+    {
+        in.clear();
+        throw std::invalid_argument("ERROR: Invalid shape");
+    }
+
+    std::vector<int> minXVector(shapes.size());
+    std::vector<int> maxXVector(shapes.size());
+    std::vector<int> minYVector(shapes.size());
+    std::vector<int> maxYVector(shapes.size());
+
+
+    int minX = std::numeric_limits<int>::min();
+    int maxX = std::numeric_limits<int>::max();
+    int minY = std::numeric_limits<int>::min();
+    int maxY = std::numeric_limits<int>::max();
+    std::for_each(shapes.begin(), shapes.end(),
+                std::bind(getFrame, minX, maxX, minY, maxY, std::placeholders::_1));
+
+    int minXOfPolygon = std::numeric_limits<int>::min();
+    int maxXOfPolygon = std::numeric_limits<int>::max();
+    int minYOfPolygon = std::numeric_limits<int>::min();
+    int maxYOfPolygon = std::numeric_limits<int>::max();
+    getFrame(minXOfPolygon, maxXOfPolygon, minYOfPolygon, maxYOfPolygon, polygon);
+
+    if (minXOfPolygon >= minX && minYOfPolygon >= minY && maxXOfPolygon <= maxX && maxYOfPolygon <= maxY)
+    {
+        answer = "<TRUE>";
+    }
+    out << answer;
+}
+
+void echo(std::vector< Polygon >& shapes, std::istream& in, std::ostream& out) {
+    iofmtguard ifmtguard(in);
+    in >> std::noskipws;
+
+    Polygon polygon;
+    in >> DelimiterIO{ ' ' } >> polygon;
+
+    if (in.fail() && !in.eof())
+    {
+        in.clear();
+        throw std::invalid_argument("ERROR: Invalid shape");
+    }
+
+    std::vector < Polygon > newShapes;
+    int countOfDublicate = 0;
+    std::for_each(shapes.begin(), shapes.end(),
+                std::bind(subEcho, std::placeholders::_1, polygon, newShapes, countOfDublicate));
+    shapes = newShapes;
+}
