@@ -37,20 +37,23 @@ void area(const std::vector< Polygon >& shapes, std::istream& in, std::ostream& 
 
     if (param == "EVEN")
     {
+        size_t temp = 0;
         out << std::accumulate(shapes.cbegin(), shapes.cend(), 0.0,
-            std::bind(getSumArea, static_cast<size_t>(0), std::placeholders::_1, std::placeholders::_2));
+            std::bind(getSumArea, temp, std::placeholders::_1, std::placeholders::_2));
     }
     else if (param == "ODD")
     {
+        size_t temp = 1;
         out << std::accumulate(shapes.cbegin(), shapes.cend(), 0.0,
-            std::bind(getSumArea, static_cast<size_t>(1), std::placeholders::_1, std::placeholders::_2));
+            std::bind(getSumArea, temp, std::placeholders::_1, std::placeholders::_2));
     }
     else if (param == "MEAN")
     {
         if (shapes.size() > 0)
         {
+            size_t temp = 2;
             out << std::accumulate(shapes.cbegin(), shapes.cend(), 0.0,
-                std::bind(getSumArea, static_cast<size_t>(2), std::placeholders::_1, std::placeholders::_2))
+                std::bind(getSumArea, temp, std::placeholders::_1, std::placeholders::_2))
                 / shapes.size();
         }
         else
@@ -60,7 +63,7 @@ void area(const std::vector< Polygon >& shapes, std::istream& in, std::ostream& 
     }
     else
     {
-        int vertexes = 0;
+        size_t vertexes = 0;
         try {
             vertexes = std::stoi(param);
         }
@@ -75,7 +78,7 @@ void area(const std::vector< Polygon >& shapes, std::istream& in, std::ostream& 
         out << std::accumulate
         (
             shapes.cbegin(), shapes.cend(), 0.0,
-            std::bind(getSumArea, static_cast<size_t>(vertexes), std::placeholders::_1, std::placeholders::_2)
+            std::bind(getSumArea, vertexes, std::placeholders::_1, std::placeholders::_2)
         );
     }
 }
