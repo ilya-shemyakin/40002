@@ -105,7 +105,7 @@ inline bool parsePolygon(const std::string& line, Polygon& out)
     }
     char extra;
     if(iss >> extra) return false;
-    out.swap(tmp);
+    out = std::move(tmp);
     return true;
 }
 }
