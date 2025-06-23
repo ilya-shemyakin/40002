@@ -94,7 +94,9 @@ std::istream& operator>>(std::istream& in, Point& point) {
         return in;
     }
     Point tmp;
-    in >> DelimiterIO{ '(' } >> tmp.x >> DelimiterIO{ ';' } >> tmp.y >> DelimiterIO{ ')' };
+    in >> DelimiterIO{ '(' };
+    in >> tmp.x;
+    in >> DelimiterIO{ ';' } >> tmp.y >> DelimiterIO{ ')' };
     if (!in.fail()) {
         point = tmp;
     }
@@ -104,7 +106,6 @@ std::istream& operator>>(std::istream& in, Point& point) {
 std::ostream& operator<<(std::ostream& out, const Point& point) {
     return out << '(' << point.x << ';' << point.y << ')';
 }
-
 
 std::istream& operator>>(std::istream& in, Polygon& polygon)
 {
@@ -120,7 +121,7 @@ std::istream& operator>>(std::istream& in, Polygon& polygon)
 
     int size;
     in >> size;
-    if (in.fail() || size < 3) // доп. защита
+    if (in.fail() || size < 3)
     {
         in.setstate(std::ios::failbit);
         return in;
@@ -158,15 +159,6 @@ std::istream& operator>>(std::istream& in, Polygon& polygon)
     }
     return in;
 }
-
-//std::ostream& operator<<(std::ostream& out,const Polygon& figure) {
-//    for (int i = 0; i < figure.points.size(); i++) {
-//        out << figure.points[i] << " ";
-//    }
-//    return out;
-//}
-
-
 #endif // !GEO_H
 
 

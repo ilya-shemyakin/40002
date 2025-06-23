@@ -52,12 +52,12 @@ private:
     std::multiset<std::pair<int, int>> set_;
 };
 
-bool hasEvenPoints(const Polygon& p) {
+bool hasEvenCountPoints(const Polygon& p) {
     return p.points.size() % 2 == 0;
 }
-
+// odd - нечет
 double accumulateOddAreas(double sum, const Polygon& p, AreaCalculator& calc) {
-    return !hasEvenPoints(p) ? sum + calc(p) : sum;
+    return !hasEvenCountPoints(p) ? sum + calc(p) : sum;
 }
 
 double accumulateAll(double sum, const Polygon& p, AreaCalculator& calc) {
@@ -74,12 +74,11 @@ bool hasCountVerticales(const Polygon& p, int count) {
 }
 
 double accumulateEvenAreas(double sum, const Polygon& p, AreaCalculator& calc) {
-    return hasEvenPoints(p) ? sum + calc(p) : sum;
+    return hasEvenCountPoints(p) ? sum + calc(p) : sum;
 }
 
 double Area(const std::vector<Polygon>& polygons, std::string str) {
     AreaCalculator calc;
-    std::cout << std::setprecision(1);
     if (str == "EVEN") {
         return std::accumulate(
             polygons.begin(),
@@ -94,10 +93,10 @@ double Area(const std::vector<Polygon>& polygons, std::string str) {
             polygons.end(),
             0.0,
             std::bind(accumulateOddAreas, std::placeholders::_1, std::placeholders::_2, std::ref(calc))
-        );
+        ); // передаем соответсвенно накопленную сумму (которая с 0 шла) и текущий элемент
     }
     else if (str == "MEAN") {
-        if (polygons.size() > 0) { // иначе делать что-то
+        if (polygons.size() > 0) {
             return std::accumulate(
                 polygons.begin(),
                 polygons.end(),
@@ -129,7 +128,7 @@ double Area(const std::vector<Polygon>& polygons, std::string str) {
 }
 
 bool compareByArea(const Polygon& p1, const Polygon& p2, AreaCalculator& calc) {
-    return calc(p1) < calc(p2); // Сравниваем площади
+    return calc(p1) < calc(p2);
 }
 
 bool compareByVeg(const Polygon& p1, const Polygon& p2) {
@@ -139,19 +138,14 @@ bool compareByVeg(const Polygon& p1, const Polygon& p2) {
 double maxSometh(const std::vector<Polygon>& polygons, std::string& str) {
     if (polygons.size() > 0) {
         if (str == "AREA") {
-            std::cout << std::fixed << std::setprecision(1);
             AreaCalculator calc;
             auto maxPolygon = std::max_element(polygons.begin(), polygons.end(),
                 std::bind(compareByArea, std::placeholders::_1, std::placeholders::_2, std::ref(calc)));
-            if (maxPolygon != polygons.end()) { // иначе делать что-то надо
-                return calc(*maxPolygon);
-            }
+            return calc(*maxPolygon);
         }
         if (str == "VERTEXES") {
             auto maxPolygon = std::max_element(polygons.begin(), polygons.end(), compareByVeg);
-            if (maxPolygon != polygons.end()) { // иначе делать что-то надо
-                return maxPolygon->points.size();
-            }
+            return maxPolygon->points.size();
         }
     }
     return -1;
@@ -160,33 +154,28 @@ double minSometh(const std::vector<Polygon>& polygons, std::string& str) {
     AreaCalculator calc;
     if (polygons.size() > 0) {
         if (str == "AREA") {
-            std::cout << std::fixed << std::setprecision(1);
             auto minPolygon = std::min_element(polygons.begin(), polygons.end(),
                 std::bind(compareByArea, std::placeholders::_1, std::placeholders::_2, std::ref(calc)));
-            if (minPolygon != polygons.end()) { // иначе делать что-то надо
-                return calc(*minPolygon);
-            }
+            return calc(*minPolygon);
         }
         if (str == "VERTEXES") {
             auto minPolygon = std::min_element(polygons.begin(), polygons.end(), compareByVeg);
-            if (minPolygon != polygons.end()) { // иначе делать что-то надо
-                return minPolygon->points.size();
-            }
+            return minPolygon->points.size();
         }
-    };
+    }
     return -1;
 }
 
 int countSomt(const std::vector<Polygon>& polygons, std::string str) {
     if (str == "EVEN") {
-        return std::count_if(polygons.begin(), polygons.end(), hasEvenPoints);
+        return std::count_if(polygons.begin(), polygons.end(), hasEvenCountPoints);
     }
     else if (str == "ODD") {
-        return polygons.size() - std::count_if(polygons.begin(), polygons.end(), hasEvenPoints);
+        return polygons.size() - std::count_if(polygons.begin(), polygons.end(), hasEvenCountPoints);
     }
     else {
         try {
-            int number = std::stoi(str); // throw
+            int number = std::stoi(str);
             if (number <= 2) {
                 return -1;
             }
@@ -198,33 +187,12 @@ int countSomt(const std::vector<Polygon>& polygons, std::string str) {
     }
 }
 
-bool compareBeCoordPoint(const Point& p1, const Point& p2, const std::string& coor) {
-    if (coor == "x") {
-        return p1.x < p2.x;
-    }
-    return p1.y < p2.y;
-}
-
-int compareBeCoordPolygons(const Polygon& p1, const Polygon& p2, const std::string& coor) {
-    auto minCoorPoint1 = std::min_element(p1.points.begin(), p1.points.end(),
-        std::bind(compareBeCoordPoint, std::placeholders::_1, std::placeholders::_2, coor));
-    auto minCoorPoint2 = std::min_element(p2.points.begin(), p2.points.end(),
-        std::bind(compareBeCoordPoint, std::placeholders::_1, std::placeholders::_2, coor));
-    try {
-        if (coor == "x") {
-            return minCoorPoint1->x < minCoorPoint2->x;
-        }
-        return minCoorPoint1->y < minCoorPoint2->y;
-    }
-    catch (std::exception&) {
-        return false;
-    }
-}
-// тут получаю крайние точки прямоуга
 std::vector<Point> getInframePoints(const std::vector<Polygon>& polygons) {
     std::vector<Point> allPoints;
-    std::for_each(polygons.begin(), polygons.end(), [&allPoints](const Polygon& poly) {
-        allPoints.insert(allPoints.end(), poly.points.begin(), poly.points.end());
+    std::accumulate(polygons.begin(), polygons.end(), 0,
+        [&allPoints](int, const Polygon& poly) {
+            std::copy(poly.points.begin(), poly.points.end(), std::back_inserter(allPoints));
+            return 0;
         });
 
     auto minX = std::min_element(allPoints.begin(), allPoints.end(),

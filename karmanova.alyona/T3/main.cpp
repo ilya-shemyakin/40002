@@ -30,12 +30,11 @@ int main(int argc, char* argv[]) {
         }
     }
     file.close();
-    //std::ifstream fileCom("file.txt");
-    //    std::cout << geoFigs.size();
     std::istream& fileCom = std::cin;
     std::string command;
     double res;
     while (fileCom >> command) {
+
         res = BAD_RESULT;
         iofmtguard guard(std::cout);
         if (command == "AREA") {
@@ -48,34 +47,32 @@ int main(int argc, char* argv[]) {
             }
             else {
                 std::cout << "<INVALID COMMAND>\n";
-                std::cin.clear();
-                std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
+                fileCom.clear();
+                fileCom.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
             }
         }
         else if (command == "MAX") {
             fileCom >> command;
             res = maxSometh(geoFigs, command);
             if (res != BAD_RESULT) {
-                //   std::cout << "MAX (delete this message) " << command << " " << "\n";
                 std::cout << res << "\n";
             }
             else {
                 std::cout << "<INVALID COMMAND>\n";
-                std::cin.clear();
-                std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
+                fileCom.clear();
+                fileCom.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
             }
         }
         else if (command == "MIN") {
             fileCom >> command;
             res = minSometh(geoFigs, command);
             if (res != BAD_RESULT) {
-                //  std::cout << "MIN (delete this message) " << command << " " << "\n";
                 std::cout << res << "\n";
             }
             else {
                 std::cout << "<INVALID COMMAND>\n";
-                std::cin.clear();
-                std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
+                fileCom.clear();
+                fileCom.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
             }
         }
         else if (command == "COUNT") {
@@ -86,8 +83,8 @@ int main(int argc, char* argv[]) {
             }
             else {
                 std::cout << "<INVALID COMMAND>\n";
-                std::cin.clear();
-                std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
+                fileCom.clear();
+                fileCom.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
             }
         }
         else if (command == "INFRAME") {
@@ -105,7 +102,6 @@ int main(int argc, char* argv[]) {
                     std::cout << "<INVALID COMMAND>\n";
                 }
                 else {
-                    //    std::cout << command << " ";
                     if (flag) {
                         std::cout << "<TRUE>" << "\n";
                     }
@@ -123,8 +119,6 @@ int main(int argc, char* argv[]) {
             iss >> p;
             if (!iss) {
                 std::cout << "<INVALID COMMAND>\n";
-                std::cin.clear();
-                std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
             }
             else
             {
@@ -133,15 +127,14 @@ int main(int argc, char* argv[]) {
                     std::cout << "<INVALID COMMAND>\n";
                 }
                 else {
-                    //std::cout << command << " ";
                     std::cout << perms(p, geoFigs) << "\n";
                 }
             }
         }
         else {
             std::cout << "<INVALID COMMAND>\n";
-            std::cin.clear();
-            std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
+            fileCom.clear();
+            fileCom.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
         }
     }
     return 0;
