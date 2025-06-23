@@ -1,6 +1,5 @@
 ﻿#ifndef DATASTRUCT_H
 #define DATASTRUCT_H
-//2
 #include <iostream>
 #include <vector>
 #include <algorithm>
