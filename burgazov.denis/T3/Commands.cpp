@@ -11,11 +11,6 @@
 
 void area(const std::vector< Polygon >& shapes, std::istream& in, std::ostream& out)
 {
-    /*if (in.peek() == '\n')
-    {
-        throw std::invalid_argument("ERROR: Missing parameters");
-    }*/
-
     iofmtguard ifmtguard(in);
     in >> std::noskipws;
 
@@ -87,18 +82,6 @@ void max(const std::vector< Polygon >& shapes, std::istream& in, std::ostream& o
         throw std::invalid_argument("ERROR: No enough shapes");
     }
 
-    /*if (in.peek() == '\n')
-    {
-        throw std::invalid_argument("No param");
-    }
-
-    iofmtguard ifmtguard(in);
-    in >> std::noskipws;
-
-    std::string param = "";
-
-    in >> DelimiterIO{ ' ' } >> param;*/
-
     iofmtguard ifmtguard(in);
     in >> std::noskipws;
 
@@ -138,18 +121,6 @@ void min(const std::vector< Polygon >& shapes, std::istream& in, std::ostream& o
     {
         throw std::invalid_argument("ERROR: No enough shapes");
     }
-
-    /*if (in.peek() == '\n')
-    {
-        throw std::invalid_argument("No param");
-    }
-
-    iofmtguard ifmtguard(in);
-    in >> std::noskipws;
-
-    std::string param = "";
-
-    in >> DelimiterIO{ ' ' } >> param;*/
 
     iofmtguard ifmtguard(in);
     in >> std::noskipws;

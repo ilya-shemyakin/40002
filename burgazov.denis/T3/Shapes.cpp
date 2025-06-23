@@ -57,17 +57,8 @@ std::istream& operator>>(std::istream& in, Polygon& polygon)
     Point point;
     for (int i = 0; i < numberOfVertices; ++i)
     {
-        /*if (in.peek() == '\n')
-        {
-            in.setstate(std::ios::failbit);
-            return in;
-        }*/
+
         in >> DelimiterIO{ ' ' };
-        /*if (in.peek() == '\n')
-        {
-            in.setstate(std::ios::failbit);
-            return in;
-        }*/
         in >> point;
         tempPolygon.points.push_back(point);
         if (in.fail() && !in.eof())
