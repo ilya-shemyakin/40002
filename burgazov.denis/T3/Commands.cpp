@@ -1,6 +1,7 @@
 #include <string>
 #include <iomanip>
 #include <numeric>
+#include <limits>
 #include <iterator>
 #include <algorithm>
 #include <functional>
@@ -293,4 +294,6 @@ void echo(std::vector< Polygon >& shapes, std::istream& in, std::ostream& out) {
     std::for_each(shapes.begin(), shapes.end(),
         std::bind(subEcho, std::placeholders::_1, polygon, newShapes, countOfDublicate));
     shapes = newShapes;
+
+    out << countOfDublicate;
 }

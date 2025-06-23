@@ -42,7 +42,7 @@ double getPolygonArea(const Polygon& polygon)
 //    return areaSum;
 //}
 
-double getSumArea(int flag, double areaSum, const Polygon& polygon)
+double getSumArea(size_t flag, double areaSum, const Polygon& polygon)
 {
     if (flag == 2) {
         return areaSum + getPolygonArea(polygon);
@@ -56,6 +56,7 @@ double getSumArea(int flag, double areaSum, const Polygon& polygon)
     else if (polygon.points.size() == flag) {
         return areaSum + getPolygonArea(polygon);
     }
+    return areaSum;
 }
 
 double getMaxArea(double area, const Polygon& polygon) {
@@ -83,13 +84,14 @@ double getMinVertexes(const size_t vertexes, const Polygon& polygon) {
 //{
 //    return polygon.points.size() % 2 != 0;
 //}
-bool isVertexes(int flag, const Polygon& polygon) {
+bool isVertexes(size_t flag, const Polygon& polygon) {
     if (flag < 2) {
         return polygon.points.size() % 2 == flag;
     }
     else if (flag > 2) {
         return polygon.points.size() == flag;
     }
+    return flag;
 }
 
 bool comparatorX(const Point& left, const Point& right)
