@@ -36,7 +36,7 @@ int main(int argc,char* argv[])
         } catch(...) {
             std::cout << "<INVALID COMMAND>\n";
             std::cin.clear();
-            if (std::cin.peek() != '\n')
+            if (std::cin.peek() != '\n' && std::cin.peek() != EOF)
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         }
     }
