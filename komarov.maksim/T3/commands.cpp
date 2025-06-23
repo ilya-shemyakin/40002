@@ -87,7 +87,8 @@ void intersectionsCmd(const PolyVec& f,std::istream& in,std::ostream& out)
     if(rest.empty() || rest[0]!=' ') throw std::runtime_error("poly");
     rest.erase(0,1);
     Polygon poly;
-    if(!parsePolygon(rest, poly)) throw std::runtime_error("parse");
+    if(!parsePolygon(rest, poly) || poly.points.size() < 3)
+        throw std::runtime_error("parse");
     out<<std::count_if(f.begin(), f.end(),
         [&](const Polygon& p){ return intersects(p, poly); });
 }
