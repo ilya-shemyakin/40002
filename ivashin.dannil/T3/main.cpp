@@ -133,6 +133,7 @@ std::vector<Polygon> readPolygons(const std::string& filename) {
         Polygon poly = parsePolygon(line);
         if (!poly.points.empty()) polygons.push_back(poly);
     }
+
     return polygons;
 }
 
