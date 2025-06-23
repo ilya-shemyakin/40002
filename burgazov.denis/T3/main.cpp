@@ -23,7 +23,7 @@ void readfile(std::string filename, std::vector<Polygon>& shapes) {
 
     while (!file.eof())
     {
-        std::copy (
+        std::copy(
             std::istream_iterator< Polygon >(file),
             std::istream_iterator< Polygon >(),
             std::back_inserter(shapes)
@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
     filename = argv[1];
 
     std::vector<Polygon> shapes;
-    try 
+    try
     {
         readfile(filename, shapes);
     }
@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
         std::cout << e.what() << '\n';
         return -1;
     }
-    
+
     std::map<std::string, std::function<void(std::istream& in, std::ostream& out)>> commands;
     commands["AREA"] = std::bind(area, std::cref(shapes), std::placeholders::_1, std::placeholders::_2);
     commands["MAX"] = std::bind(max, std::cref(shapes), std::placeholders::_1, std::placeholders::_2);

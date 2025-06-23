@@ -36,8 +36,8 @@ void area(const std::vector< Polygon >& shapes, std::istream& in, std::ostream& 
 
     if (param == "EVEN")
     {
-        out << std::accumulate(shapes.cbegin(), shapes.cend(), 0.0, 
-                                std::bind(getSumArea, 0, std::placeholders::_1, std::placeholders::_2));
+        out << std::accumulate(shapes.cbegin(), shapes.cend(), 0.0,
+            std::bind(getSumArea, 0, std::placeholders::_1, std::placeholders::_2));
     }
     else if (param == "ODD")
     {
@@ -48,8 +48,8 @@ void area(const std::vector< Polygon >& shapes, std::istream& in, std::ostream& 
     {
         if (shapes.size() > 0)
         {
-            out << std::accumulate (shapes.cbegin(), shapes.cend(), 0.0,
-                                    std::bind(getSumArea, 2, std::placeholders::_1, std::placeholders::_2))
+            out << std::accumulate(shapes.cbegin(), shapes.cend(), 0.0,
+                std::bind(getSumArea, 2, std::placeholders::_1, std::placeholders::_2))
                 / shapes.size();
         }
         else
@@ -207,12 +207,12 @@ void count(const std::vector< Polygon >& shapes, std::istream& in, std::ostream&
     if (param == "EVEN")
     {
         out << std::count_if(shapes.begin(), shapes.end(),
-                            std::bind(isVertexes, 0, std::placeholders::_1));
+            std::bind(isVertexes, 0, std::placeholders::_1));
     }
     else if (param == "ODD")
     {
         out << std::count_if(shapes.begin(), shapes.end(),
-                            std::bind(isVertexes, 1, std::placeholders::_1));
+            std::bind(isVertexes, 1, std::placeholders::_1));
     }
     else
     {
@@ -228,8 +228,8 @@ void count(const std::vector< Polygon >& shapes, std::istream& in, std::ostream&
             throw std::invalid_argument("ERROR: Invalid parameters");
         }
 
-        out << std::count_if(shapes.begin(), shapes.end(), 
-                            std::bind(isVertexes, vertexes, std::placeholders::_1));
+        out << std::count_if(shapes.begin(), shapes.end(),
+            std::bind(isVertexes, vertexes, std::placeholders::_1));
     }
 }
 
@@ -260,7 +260,7 @@ void inframe(const std::vector< Polygon >& shapes, std::istream& in, std::ostrea
     int minY = std::numeric_limits<int>::min();
     int maxY = std::numeric_limits<int>::max();
     std::for_each(shapes.begin(), shapes.end(),
-                std::bind(getFrame, minX, maxX, minY, maxY, std::placeholders::_1));
+        std::bind(getFrame, minX, maxX, minY, maxY, std::placeholders::_1));
 
     int minXOfPolygon = std::numeric_limits<int>::min();
     int maxXOfPolygon = std::numeric_limits<int>::max();
@@ -291,6 +291,6 @@ void echo(std::vector< Polygon >& shapes, std::istream& in, std::ostream& out) {
     std::vector < Polygon > newShapes;
     int countOfDublicate = 0;
     std::for_each(shapes.begin(), shapes.end(),
-                std::bind(subEcho, std::placeholders::_1, polygon, newShapes, countOfDublicate));
+        std::bind(subEcho, std::placeholders::_1, polygon, newShapes, countOfDublicate));
     shapes = newShapes;
 }
