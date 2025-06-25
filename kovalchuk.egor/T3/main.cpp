@@ -10,8 +10,7 @@
 
 void processCommands(const std::vector<Polygon>& shapes) {
     std::string line;
-    if (!std::getline(std::cin, line))
-        return;
+    if (!std::getline(std::cin, line)) return;
 
     std::istringstream iss(line);
     std::string cmd;
@@ -22,17 +21,12 @@ void processCommands(const std::vector<Polygon>& shapes) {
         if (!(iss >> arg) || (iss >> std::ws, !iss.eof())) {
             std::cout << "<INVALID COMMAND>\n";
         }
-        else if (arg == "EVEN") {
+        else if (arg == "EVEN" || arg == "ODD") {
+            bool wantEven = (arg == "EVEN");
             double sum = std::accumulate(shapes.begin(), shapes.end(), 0.0,
-                [](double acc, const Polygon& p) {
-                    return acc + ((p.points.size() % 2 == 0) ? polygonArea(p) : 0.0);
-                });
-            std::cout << std::fixed << std::setprecision(1) << sum << "\n";
-        }
-        else if (arg == "ODD") {
-            double sum = std::accumulate(shapes.begin(), shapes.end(), 0.0,
-                [](double acc, const Polygon& p) {
-                    return acc + ((p.points.size() % 2 != 0) ? polygonArea(p) : 0.0);
+                [&](double acc, const Polygon& p) {
+                    return acc + ((p.points.size() % 2 == 0) == wantEven
+                        ? polygonArea(p) : 0.0);
                 });
             std::cout << std::fixed << std::setprecision(1) << sum << "\n";
         }
@@ -52,12 +46,17 @@ void processCommands(const std::vector<Polygon>& shapes) {
         else {
             try {
                 int n = std::stoi(arg);
-                double sum = std::accumulate(shapes.begin(), shapes.end(), 0.0,
-                    [n](double acc, const Polygon& p) {
-                        return acc + ((static_cast<int>(p.points.size()) == n)
-                            ? polygonArea(p) : 0.0);
-                    });
-                std::cout << std::fixed << std::setprecision(1) << sum << "\n";
+                if (n < 3) {
+                    std::cout << "<INVALID COMMAND>\n";
+                }
+                else {
+                    double sum = std::accumulate(shapes.begin(), shapes.end(), 0.0,
+                        [n](double acc, const Polygon& p) {
+                            return acc + ((static_cast<int>(p.points.size()) == n)
+                                ? polygonArea(p) : 0.0);
+                        });
+                    std::cout << std::fixed << std::setprecision(1) << sum << "\n";
+                }
             }
             catch (...) {
                 std::cout << "<INVALID COMMAND>\n";
@@ -193,6 +192,5 @@ int main(int argc, char* argv[]) {
     readPolygons(file, shapes);
 
     processCommands(shapes);
-
     return 0;
 }

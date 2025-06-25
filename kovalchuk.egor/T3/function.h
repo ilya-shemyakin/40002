@@ -27,9 +27,7 @@ inline bool operator==(const Polygon& p1, const Polygon& p2) {
 
 inline double polygonArea(const Polygon& p) {
     int n = p.points.size();
-    if (n < 3) {
-        return 0.0;
-    }
+    if (n < 3) return 0.0;
     std::vector<Point> cp(p.points);
     cp.push_back(cp.front());
     double crossSum = std::inner_product(
@@ -44,9 +42,7 @@ inline double polygonArea(const Polygon& p) {
 }
 
 inline bool isRectangle(const Polygon& p) {
-    if (p.points.size() != 4) {
-        return false;
-    }
+    if (p.points.size() != 4) return false;
     Point a{ p.points[1].x - p.points[0].x, p.points[1].y - p.points[0].y };
     Point b{ p.points[2].x - p.points[1].x, p.points[2].y - p.points[1].y };
     Point c{ p.points[3].x - p.points[2].x, p.points[3].y - p.points[2].y };
@@ -60,15 +56,12 @@ inline bool isRectangle(const Polygon& p) {
 
 inline bool parsePoints(std::istringstream& iss, int count, std::vector<Point>& pts) {
     if (count <= 0) return true;
-
-    char c;
-    Point pt;
+    char c; Point pt;
     if (!(iss >> c) || c != '(') return false;
     if (!(iss >> pt.x)) return false;
     if (!(iss >> c) || c != ';') return false;
     if (!(iss >> pt.y)) return false;
     if (!(iss >> c) || c != ')') return false;
-
     pts.push_back(pt);
     return parsePoints(iss, count - 1, pts);
 }
@@ -77,7 +70,9 @@ inline bool parsePolygon(std::istringstream& iss, Polygon& poly) {
     int n;
     if (!(iss >> n) || n < 3) return false;
     poly.points.clear();
-    return parsePoints(iss, n, poly.points);
+    if (!parsePoints(iss, n, poly.points)) return false;
+    if (iss >> std::ws, !iss.eof()) return false;
+    return true;
 }
 
 inline void readPolygons(std::istream& in, std::vector<Polygon>& polys) {
