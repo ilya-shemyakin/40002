@@ -1,4 +1,4 @@
-//Variant 5. ECHO. INFRAME.
+//Variant 5. ECHO. INFRAME
 #include <iostream>
 #include <vector>
 #include <string>
