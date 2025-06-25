@@ -25,7 +25,6 @@ inline bool operator==(const Polygon& p1, const Polygon& p2) {
     return p1.points == p2.points;
 }
 
-// shoelace formula
 inline double polygonArea(const Polygon& p) {
     int n = p.points.size();
     if (n < 3) {
@@ -43,7 +42,6 @@ inline double polygonArea(const Polygon& p) {
         });
     return std::fabs(crossSum) / 2.0;
 }
-
 
 inline bool isRectangle(const Polygon& p) {
     if (p.points.size() != 4) {

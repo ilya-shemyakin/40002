@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -28,25 +27,26 @@ void processCommands(const std::vector<Polygon>& shapes) {
                 [](double acc, const Polygon& p) {
                     return acc + ((p.points.size() % 2 == 0) ? polygonArea(p) : 0.0);
                 });
-            std::cout << sum << "\n";
+            std::cout << std::fixed << std::setprecision(1) << sum << "\n";
         }
         else if (arg == "ODD") {
             double sum = std::accumulate(shapes.begin(), shapes.end(), 0.0,
                 [](double acc, const Polygon& p) {
                     return acc + ((p.points.size() % 2 != 0) ? polygonArea(p) : 0.0);
                 });
-            std::cout << sum << "\n";
+            std::cout << std::fixed << std::setprecision(1) << sum << "\n";
         }
         else if (arg == "MEAN") {
             if (shapes.empty()) {
-                std::cout << 0.0 << "\n";
+                std::cout << "<INVALID COMMAND>\n";
             }
             else {
                 double total = std::accumulate(shapes.begin(), shapes.end(), 0.0,
                     [](double acc, const Polygon& p) {
                         return acc + polygonArea(p);
                     });
-                std::cout << (total / shapes.size()) << "\n";
+                std::cout << std::fixed << std::setprecision(1)
+                    << (total / shapes.size()) << "\n";
             }
         }
         else {
@@ -57,7 +57,7 @@ void processCommands(const std::vector<Polygon>& shapes) {
                         return acc + ((static_cast<int>(p.points.size()) == n)
                             ? polygonArea(p) : 0.0);
                     });
-                std::cout << sum << "\n";
+                std::cout << std::fixed << std::setprecision(1) << sum << "\n";
             }
             catch (...) {
                 std::cout << "<INVALID COMMAND>\n";
@@ -72,7 +72,7 @@ void processCommands(const std::vector<Polygon>& shapes) {
         }
         else if (arg == "AREA") {
             if (shapes.empty()) {
-                std::cout << 0.0 << "\n";
+                std::cout << "<INVALID COMMAND>\n";
             }
             else {
                 double init = polygonArea(shapes.front());
@@ -81,12 +81,12 @@ void processCommands(const std::vector<Polygon>& shapes) {
                         double a = polygonArea(p);
                         return isMax ? std::max(acc, a) : std::min(acc, a);
                     });
-                std::cout << res << "\n";
+                std::cout << std::fixed << std::setprecision(1) << res << "\n";
             }
         }
         else if (arg == "VERTEXES") {
             if (shapes.empty()) {
-                std::cout << 0.0 << "\n";
+                std::cout << "<INVALID COMMAND>\n";
             }
             else {
                 int init = static_cast<int>(shapes.front().points.size());
@@ -95,7 +95,7 @@ void processCommands(const std::vector<Polygon>& shapes) {
                         int v = static_cast<int>(p.points.size());
                         return isMax ? std::max(acc, v) : std::min(acc, v);
                     });
-                std::cout << static_cast<double>(res) << "\n";
+                std::cout << res << "\n";
             }
         }
         else {
@@ -113,16 +113,21 @@ void processCommands(const std::vector<Polygon>& shapes) {
                 [wantEven](const Polygon& p) {
                     return (p.points.size() % 2 == 0) == wantEven;
                 });
-            std::cout << static_cast<double>(cnt) << "\n";
+            std::cout << cnt << "\n";
         }
         else {
             try {
                 int n = std::stoi(arg);
-                int cnt = std::count_if(shapes.begin(), shapes.end(),
-                    [n](const Polygon& p) {
-                        return static_cast<int>(p.points.size()) == n;
-                    });
-                std::cout << static_cast<double>(cnt) << "\n";
+                if (n < 3) {
+                    std::cout << "<INVALID COMMAND>\n";
+                }
+                else {
+                    int cnt = std::count_if(shapes.begin(), shapes.end(),
+                        [n](const Polygon& p) {
+                            return static_cast<int>(p.points.size()) == n;
+                        });
+                    std::cout << cnt << "\n";
+                }
             }
             catch (...) {
                 std::cout << "<INVALID COMMAND>\n";
@@ -136,7 +141,7 @@ void processCommands(const std::vector<Polygon>& shapes) {
         else {
             int cnt = std::count_if(shapes.begin(), shapes.end(),
                 [](const Polygon& p) { return isRectangle(p); });
-            std::cout << static_cast<double>(cnt) << "\n";
+            std::cout << cnt << "\n";
         }
     }
     else if (cmd == "MAXSEQ") {
@@ -161,7 +166,7 @@ void processCommands(const std::vector<Polygon>& shapes) {
                         }
                         return std::make_pair(0, acc.second);
                     });
-                std::cout << static_cast<double>(pr.second) << "\n";
+                std::cout << pr.second << "\n";
             }
         }
     }
@@ -187,7 +192,6 @@ int main(int argc, char* argv[]) {
     std::vector<Polygon> shapes;
     readPolygons(file, shapes);
 
-    std::cout << std::fixed << std::setprecision(1);
     processCommands(shapes);
 
     return 0;
