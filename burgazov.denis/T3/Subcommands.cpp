@@ -95,7 +95,7 @@ bool comparatorY(const Point& left, const Point& right)
     return left.y < right.y;
 }
 
-void getFrame(int& minX, int& maxX, int& minY, int& maxY, const Polygon& polygon) {
+Polygon getFrame(int& minX, int& maxX, int& minY, int& maxY, const Polygon& polygon) {
     minX = std::min(minX, (*std::min_element(polygon.points.cbegin(), polygon.points.cend(), comparatorX)).x);
     maxX = std::max(maxX, (*std::max_element(polygon.points.cbegin(), polygon.points.cend(), comparatorX)).x);
     minY = std::min(minY, (*std::min_element(polygon.points.cbegin(), polygon.points.cend(), comparatorY)).y);
