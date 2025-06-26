@@ -254,7 +254,7 @@ void echo(std::vector< Polygon >& shapes, std::istream& in, std::ostream& out) {
 
     std::vector < Polygon > newShapes;
     int countOfDublicate = 0;
-    std::for_each(shapes.begin(), shapes.end(),
+    std::transform(shapes.begin(), shapes.end(), std::back_inserter(newShapes),
         std::bind(subEcho, std::placeholders::_1, std::cref(polygon), std::ref(newShapes), std::ref(countOfDublicate)));
     shapes = newShapes;
 

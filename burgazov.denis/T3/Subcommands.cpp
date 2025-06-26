@@ -113,10 +113,10 @@ bool isEqual(const Polygon& left, const Polygon& right) {
     return std::equal(left.points.begin(), left.points.end(), right.points.begin(), predicatePoint);
 }
 
-void subEcho(const Polygon& source, const Polygon& forCompare, std::vector<Polygon>& dest, int& count) {
+Polygon subEcho(const Polygon& source, const Polygon& forCompare, std::vector<Polygon>& dest, int& count) {
     if (isEqual(source, forCompare)) {
         dest.push_back(source);
         count++;
     }
-    dest.push_back(source);
+    return source;
 }

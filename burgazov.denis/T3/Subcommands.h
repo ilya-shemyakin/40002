@@ -19,6 +19,6 @@ bool isOdd(const Polygon& polygon);
 bool isVertexes(const Polygon& polygon, const unsigned countOfVertexes);
 void getFrame(int& minX, int& maxX, int& minY, int& maxY, const Polygon& polygon);
 bool isEqual(const Polygon& left, const Polygon& right);
-void subEcho(const Polygon& source, const Polygon& forCompare, std::vector<Polygon>& dest, int& count);
+Polygon subEcho(const Polygon& source, const Polygon& forCompare, std::vector<Polygon>& dest, int& count);
 
 #endif
