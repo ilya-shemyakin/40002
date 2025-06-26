@@ -6,57 +6,114 @@
 #include <limits>
 #include <cctype>
 
-bool Point::operator==(Point const& o) const { return x == o.x && y == o.y; }
-bool Point::operator<(Point const& o) const { return x < o.x || (x == o.x && y < o.y); }
+bool Point::operator==(const Point& o) const
+{
+    return x == o.x && y == o.y;
+}
 
-bool parsePoint(std::string const& tok, Point& pt) {
-    if (tok.size() < 5 || tok.front() != '(' || tok.back() != ')') return false;
+bool Point::operator<(const Point& o) const
+{
+    return x < o.x || (x == o.x && y < o.y);
+}
+
+bool parsePoint(const std::string& tok, Point& pt)
+{
+    if (tok.size() < 5 || tok.front() != '(' || tok.back() != ')')
+    {
+        return false;
+    }
     auto s = tok.substr(1, tok.size() - 2);
-    auto pos = s.find(';'); if (pos == std::string::npos) return false;
-    try { pt.x = std::stoi(s.substr(0, pos)); pt.y = std::stoi(s.substr(pos + 1)); }
-    catch (...) { return false; }
+    auto pos = s.find(';');
+    if (pos == std::string::npos)
+    {
+        return false;
+    }
+    try
+    {
+        pt.x = std::stoi(s.substr(0, pos));
+        pt.y = std::stoi(s.substr(pos + 1));
+    }
+    catch (...)
+    {
+        return false;
+    }
     return true;
 }
 
-bool readPolygon(std::string const& line, Polygon& poly) {
-    std::istringstream iss(line);
-    int n; if (!(iss >> n) || n < 3) return false;
-    poly.points.clear();
-    for (int i = 0;i < n;++i) {
-        std::string tok; if (!(iss >> tok)) return false;
-        Point pt; if (!parsePoint(tok, pt)) return false;
-        poly.points.push_back(pt);
-    }
-    std::string rest; std::getline(iss, rest);
-    return std::all_of(rest.begin(), rest.end(), [](char c) { return std::isspace((unsigned char)c); });
-}
-
-double calculateArea(Polygon const& p) {
-    auto it0 = p.points.begin();
-    auto it1 = std::next(it0);
-    double cross0 = it0->x * p.points.back().y - it0->y * p.points.back().x;
-    return std::abs(std::inner_product(
-        it1, p.points.end(),
-        it0, cross0,
-        std::plus<>(),
-        [](Point const& a, Point const& b) { return a.x * b.y - a.y * b.x; }
-    )) * 0.5;
-}
-
-Rect::Rect(Polygon const& p)
-    : minx(std::numeric_limits<int>::max())
-    , miny(std::numeric_limits<int>::max())
-    , maxx(std::numeric_limits<int>::lowest())
-    , maxy(std::numeric_limits<int>::lowest())
+bool readPolygon(const std::string& line, Polygon& poly)
 {
-    for (auto const& pt : p.points) {
-        minx = std::min(minx, pt.x);
-        maxx = std::max(maxx, pt.x);
-        miny = std::min(miny, pt.y);
-        maxy = std::max(maxy, pt.y);
+    std::istringstream iss(line);
+    int n;
+    if (!(iss >> n) || n < 3)
+    {
+        return false;
     }
+
+    poly.points.clear();
+    std::vector<std::string> tokens;
+    std::copy(std::istream_iterator<std::string>(iss),
+        std::istream_iterator<std::string>(),
+        std::back_inserter(tokens));
+
+    if (tokens.size() != static_cast<size_t>(n))
+    {
+        return false;
+    }
+
+    return std::all_of(tokens.begin(), tokens.end(),
+        [&poly](const std::string& token)
+        {
+            Point pt;
+            if (!parsePoint(token, pt))
+            {
+                return false;
+            }
+            poly.points.push_back(pt);
+            return true;
+        });
 }
 
-bool Rect::intersects(Rect const& o) const {
+double calculateArea(const Polygon& p)
+{
+    const auto& pts = p.points;
+    if (pts.size() < 3)
+    {
+        return 0.0;
+    }
+
+    auto accumulate_area = [](double area, const std::pair<Point, Point>& edge)
+        {
+            return area + (edge.first.x + edge.second.x) * (edge.first.y - edge.second.y);
+        };
+
+    std::vector<std::pair<Point, Point>> edges;
+    std::transform(pts.begin(), std::prev(pts.end()),
+        std::next(pts.begin()),
+        std::back_inserter(edges),
+        [](const Point& a, const Point& b)
+        {
+            return std::make_pair(a, b);
+        });
+
+    edges.emplace_back(pts.back(), pts.front());
+    double area = std::accumulate(edges.begin(), edges.end(), 0.0, accumulate_area);
+    return std::abs(area) * 0.5;
+}
+
+Rect::Rect(const Polygon& p)
+{
+    auto cmpX = [](Point const& a, Point const& b) { return a.x < b.x; };
+    auto [minXIt, maxXIt] = std::minmax_element(p.points.begin(), p.points.end(), cmpX);
+    minx = minXIt->x;
+    maxx = maxXIt->x;
+
+    auto cmpY = [](Point const& a, Point const& b) { return a.y < b.y; };
+    auto [minYIt, maxYIt] = std::minmax_element(p.points.begin(), p.points.end(), cmpY);
+    miny = minYIt->y;
+    maxy = maxYIt->y;
+}
+
+bool Rect::intersects(const Rect& o) const
+{
     return !(maxx < o.minx || o.maxx < minx || maxy < o.miny || o.maxy < miny);
 }

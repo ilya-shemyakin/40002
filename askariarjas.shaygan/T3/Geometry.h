@@ -7,23 +7,23 @@
 
 struct Point {
     int x, y;
-    bool operator==(Point const& o) const;
-    bool operator<(Point const& o) const;
+    bool operator==(const Point& o) const;
+    bool operator<(const Point& o) const;
 };
 
 struct Polygon {
     std::vector<Point> points;
 };
 
-bool readPolygon(std::string const& line, Polygon& poly);
-double calculateArea(Polygon const& p);
+bool readPolygon(const std::string& line, Polygon& poly);
+double calculateArea(const Polygon& p);
 
 struct Rect {
     int minx, miny, maxx, maxy;
-    Rect(Polygon const& p);
-    bool intersects(Rect const& o) const;
+    Rect(const Polygon& p);
+    bool intersects(const Rect& o) const;
 };
 
-bool parsePoint(std::string const& tok, Point& pt);
+bool parsePoint(const std::string& tok, Point& pt);
 
 #endif
