@@ -64,14 +64,8 @@ void area(const std::vector< Polygon >& shapes, std::istream& in, std::ostream& 
             throw std::invalid_argument("ERROR: Invalid parameters");
         }
 
-        out << std::accumulate
-        (
-            shapes.cbegin(), shapes.cend(), 0.0,
-            std::bind
-            (
-                getVertexesArea, std::placeholders::_1, std::placeholders::_2, vertexes
-            )
-        );
+        out << std::accumulate(shapes.cbegin(), shapes.cend(), 0.0,
+            std::bind(getVertexesArea, std::placeholders::_1, std::placeholders::_2, vertexes));
     }
 }
 
@@ -216,6 +210,7 @@ void inframe(const std::vector< Polygon >& shapes, std::istream& in, std::ostrea
     if (in.fail() && !in.eof())
     {
         in.clear();
+        in.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
         throw std::invalid_argument("ERROR: Invalid shape");
     }
 
@@ -255,6 +250,7 @@ void echo(std::vector< Polygon >& shapes, std::istream& in, std::ostream& out) {
     if (in.fail() && !in.eof())
     {
         in.clear();
+        in.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
         throw std::invalid_argument("ERROR: Invalid shape");
     }
 
