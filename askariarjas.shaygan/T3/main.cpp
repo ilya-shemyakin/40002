@@ -25,6 +25,7 @@ int main(int argc, char* argv[])
 
     std::vector<Polygon> polygons;
     std::string line;
+
     while (std::getline(fin, line))
     {
         if (line.empty())
