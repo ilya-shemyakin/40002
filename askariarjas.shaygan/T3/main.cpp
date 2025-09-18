@@ -7,7 +7,6 @@
 #include <algorithm>
 #include <numeric>
 #include <iomanip>
-#include <iterator>
 
 int main(int argc, char* argv[])
 {
@@ -26,7 +25,6 @@ int main(int argc, char* argv[])
 
     std::vector<Polygon> polygons;
     std::string line;
-
     while (std::getline(fin, line))
     {
         if (line.empty())
@@ -86,6 +84,11 @@ int main(int argc, char* argv[])
                 try
                 {
                     size_t v = std::stoul(arg);
+                    if (v < 3)
+                    {
+                        std::cout << "<INVALID COMMAND>\n";
+                        continue;
+                    }
                     double sum = std::accumulate(polygons.begin(), polygons.end(), 0.0,
                         [v](double acc, const Polygon& p)
                         {
@@ -98,6 +101,7 @@ int main(int argc, char* argv[])
                     std::cout << "<INVALID COMMAND>\n";
                 }
             }
+
         }
         else if (cmd == "MAX" || cmd == "MIN")
         {
@@ -153,6 +157,11 @@ int main(int argc, char* argv[])
                 try
                 {
                     size_t v = std::stoul(arg);
+                    if (v < 3)
+                    {
+                        std::cout << "<INVALID COMMAND>\n";
+                        continue;
+                    }
                     int cnt = std::count_if(polygons.begin(), polygons.end(),
                         [v](const Polygon& p)
                         {
@@ -165,6 +174,7 @@ int main(int argc, char* argv[])
                     std::cout << "<INVALID COMMAND>\n";
                 }
             }
+
         }
         else if (cmd == "LESSAREA")
         {
