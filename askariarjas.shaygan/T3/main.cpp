@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <numeric>
 #include <iomanip>
+#include <iterator>
 
 int main(int argc, char* argv[])
 {
