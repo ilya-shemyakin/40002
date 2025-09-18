@@ -103,14 +103,19 @@ double calculateArea(const Polygon& p)
 Rect::Rect(const Polygon& p)
 {
     auto cmpX = [](Point const& a, Point const& b) { return a.x < b.x; };
-    auto [minXIt, maxXIt] = std::minmax_element(p.points.begin(), p.points.end(), cmpX);
+    auto mmx = std::minmax_element(p.points.begin(), p.points.end(), cmpX);
+    auto minXIt = mmx.first;
+    auto maxXIt = mmx.second;
     minx = minXIt->x;
     maxx = maxXIt->x;
 
     auto cmpY = [](Point const& a, Point const& b) { return a.y < b.y; };
-    auto [minYIt, maxYIt] = std::minmax_element(p.points.begin(), p.points.end(), cmpY);
+    auto mmy = std::minmax_element(p.points.begin(), p.points.end(), cmpY);
+    auto minYIt = mmy.first;
+    auto maxYIt = mmy.second;
     miny = minYIt->y;
     maxy = maxYIt->y;
+
 }
 
 bool Rect::intersects(const Rect& o) const
